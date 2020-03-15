@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrSquash.Services.Famulus",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrSquash.Core", "MrSquash.Core\MrSquash.Core.csproj", "{3FF2F9E6-53B8-4538-9962-FBC4C279023E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrSquash.Controls", "MrSquash.Controls\MrSquash.Controls.csproj", "{0CD57459-F72F-4E75-9FE6-F11D369EFCBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrSquash.Controls", "MrSquash.Controls\MrSquash.Controls.csproj", "{0CD57459-F72F-4E75-9FE6-F11D369EFCBC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1C63D79-280F-41A5-988D-D0C96DCCA188}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
