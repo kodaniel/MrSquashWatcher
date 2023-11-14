@@ -38,10 +38,14 @@ namespace MrSquashWatcher
             return null;
         }
 
-        protected override void RegisterTypes(IContainerRegistry containerRegistry)
+        protected override void RegisterTypes(IContainerRegistry container)
         {
             // Views and Viewmodels
-            containerRegistry.Register<MainViewModel>();
+            container.Register<MainViewModel>();
+
+            // Services
+            container.Register<IStartupService, StartupService>();
+            container.Register<IFamulusService, FamulusService>();
         }
 
         private void OnApplicationExit(object sender, ExitEventArgs e)

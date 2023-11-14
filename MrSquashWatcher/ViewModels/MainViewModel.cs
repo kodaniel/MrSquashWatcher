@@ -1,18 +1,11 @@
-﻿using H.NotifyIcon;
-using H.NotifyIcon.Core;
-using Microsoft.Win32;
-using MrSquash.Core;
-using MrSquash.Core.Events;
-using MrSquash.Services.Famulus;
+﻿using H.NotifyIcon.Core;
 using MrSquashWatcher.Properties;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -20,25 +13,24 @@ namespace MrSquashWatcher
 {
     public class MainViewModel : BindableBase
     {
-        public static string ExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
-        private const string APP_KEY = "MrSquashWatcher";
-
         private readonly IEventAggregator _eventAggregator;
+        private readonly IStartupService _startupService;
+        private readonly IFamulusService _famulusService;
+
         private readonly DispatcherTimer _refreshTimer;
-        private readonly string FamulusSquashURL = "https://famulushotel.hu/palyafoglalas/squash";
         private readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(2);
 
-        private ObservableCollection<GameMatch> _games;
-        public ObservableCollection<GameMatch> Games =>
-            _games ?? (_games = new ObservableCollection<GameMatch>());
+        private ObservableCollection<GameViewModel> _games;
+        public ObservableCollection<GameViewModel> Games =>
+            _games ?? (_games = new ObservableCollection<GameViewModel>());
 
         private DelegateCommand _refreshCommand;
         public DelegateCommand RefreshCommand =>
             _refreshCommand ?? (_refreshCommand = new DelegateCommand(ExecuteRefreshCommand, CanExecuteRefreshCommand));
 
-        private DelegateCommand<GameMatch> _watchingChangedCommand;
-        public DelegateCommand<GameMatch> WatchingChangedCommand =>
-            _watchingChangedCommand ?? (_watchingChangedCommand = new DelegateCommand<GameMatch>(gm =>
+        private DelegateCommand<GameViewModel> _watchingChangedCommand;
+        public DelegateCommand<GameViewModel> WatchingChangedCommand =>
+            _watchingChangedCommand ?? (_watchingChangedCommand = new DelegateCommand<GameViewModel>(gm =>
             {
                 UserSettings.Instance.SetWatching(gm.Row, gm.Column, gm.Watching);
             }));
@@ -63,13 +55,13 @@ namespace MrSquashWatcher
 
         public bool AutoStartupApplication
         {
-            get => IsRunApplicationOnStartup();
+            get => _startupService.IsRunApplicationOnStartup();
             set
             {
                 if (value)
-                    AddApplicationToStartup();
+                    _startupService.AddApplicationToStartup();
                 else
-                    RemoveApplicationFromStartup();
+                    _startupService.RemoveApplicationFromStartup();
             }
         }
 
@@ -80,14 +72,16 @@ namespace MrSquashWatcher
             set => SetProperty(ref _week, value);
         }
 
-        public MainViewModel(IEventAggregator eventAggregator)
+        public MainViewModel(IEventAggregator eventAggregator, IFamulusService famulusService, IStartupService startupService)
         {
             _eventAggregator = eventAggregator;
+            _famulusService = famulusService;
+            _startupService = startupService;
 
             _refreshTimer = new DispatcherTimer(TimeSpan.Zero, DispatcherPriority.Background, OnRefresh, Application.Current.Dispatcher);
             _refreshTimer.Start();
 
-            _eventAggregator.GetEvent<GameChagedEvent>().Subscribe(gm =>
+            _eventAggregator.GetEvent<GameChangedEvent>().Subscribe(gm =>
             {
                 try
                 {
@@ -119,8 +113,7 @@ namespace MrSquashWatcher
             Refreshing = true;
             _refreshTimer.Stop();
 
-            var fs = new FamulusService();
-            var days = await fs.LoadDays(FamulusSquashURL);
+            var days = await _famulusService.FetchCurrentWeek();
 
             if (days != null)
             {
@@ -131,12 +124,12 @@ namespace MrSquashWatcher
                     foreach (Track track in day.Tracks)
                     {
                         col = 0;
-                        foreach (Reservation r in track.Times)
+                        foreach (Appointment r in track.Times)
                         {
-                            GameMatch gm = GetGameFromGrid(row, col);
+                            GameViewModel gm = GetGameFromGrid(row, col);
                             if (gm is null)
                             {
-                                gm = new GameMatch();
+                                gm = new GameViewModel();
                                 gm.StartTime = day.Date.Add(r.StartTime);
                                 gm.EndTime = day.Date.Add(r.EndTime);
                                 gm.Busy = r.Busy;
@@ -152,7 +145,7 @@ namespace MrSquashWatcher
                                 if (gm.Enabled && gm.Busy && !r.Busy) // pálya felszabadult
                                 {
                                     if (gm.Watching)
-                                        _eventAggregator.GetEvent<GameChagedEvent>().Publish(gm);
+                                        _eventAggregator.GetEvent<GameChangedEvent>().Publish(gm);
                                 }
 
                                 gm.Busy = r.Busy;
@@ -209,39 +202,12 @@ namespace MrSquashWatcher
             Application.Current.Shutdown();
         }
 
-        private GameMatch GetGameFromGrid(int row, int column)
+        private GameViewModel GetGameFromGrid(int row, int column)
         {
             if (Games.Count == 0)
                 return null;
 
             return Games.FirstOrDefault(x => x.Row == row && x.Column == column);
-        }
-
-        public static void AddApplicationToStartup()
-        {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-            {
-                key.SetValue(APP_KEY, ExecutablePath);
-            }
-        }
-
-        public static void RemoveApplicationFromStartup()
-        {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-            {
-                key.DeleteValue(APP_KEY, false);
-            }
-        }
-
-        public static bool IsRunApplicationOnStartup()
-        {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-            {
-                if (key.GetValue(APP_KEY) is null)
-                    return false;
-                else
-                    return true;
-            }
         }
     }
 }

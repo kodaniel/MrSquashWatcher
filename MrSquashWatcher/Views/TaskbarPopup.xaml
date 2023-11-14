@@ -1,36 +1,50 @@
-﻿<UserControl x:Class="MrSquashWatcher.TaskbarPopup"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:MrSquashWatcher"
-             xmlns:core="clr-namespace:MrSquash.Core;assembly=MrSquash.Core"
-             xmlns:controls="clr-namespace:MrSquash.Controls;assembly=MrSquash.Controls"
-             xmlns:converters="clr-namespace:MrSquashWatcher.Converters"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="300">
+﻿<UserControl
+    x:Class="MrSquashWatcher.TaskbarPopup"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:MrSquash.Controls;assembly=MrSquash.Controls"
+    xmlns:converters="clr-namespace:MrSquashWatcher.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MrSquashWatcher"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
+    d:DesignHeight="400"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
     <materialDesign:Card Margin="10">
         <DockPanel>
-            <materialDesign:ColorZone Mode="Dark" DockPanel.Dock="Top">
+            <materialDesign:ColorZone DockPanel.Dock="Top" Mode="Dark">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="{Binding Week, StringFormat='{}{0}. hét'}" 
-                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                               VerticalAlignment="Center" Margin="8" />
+                    <TextBlock
+                        Margin="8"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        Text="{Binding Week, StringFormat='{}{0}. hét'}" />
 
-                    <StackPanel Orientation="Horizontal" Margin="8" Grid.Column="1">
-                        <Button Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}" Command="{Binding RefreshCommand}" Width="30" Height="30"
-                                Background="Transparent"
-                                BorderBrush="Transparent"
-                                materialDesign:RippleAssist.IsDisabled="True"
-                                materialDesign:ButtonProgressAssist.IsIndeterminate="True"
-                                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding Refreshing}">
-                            <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24" />
+                    <StackPanel
+                        Grid.Column="1"
+                        Margin="8"
+                        Orientation="Horizontal">
+                        <Button
+                            Width="30"
+                            Height="30"
+                            materialDesign:ButtonProgressAssist.IsIndeterminate="True"
+                            materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding Refreshing}"
+                            materialDesign:RippleAssist.IsDisabled="True"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
+                            <materialDesign:PackIcon
+                                Width="24"
+                                Height="24"
+                                Kind="Refresh" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -44,7 +58,7 @@
 
                 <Grid>
                     <Grid.Resources>
-                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignTextBlock}">
+                        <Style BasedOn="{StaticResource MaterialDesignTextBlock}" TargetType="{x:Type TextBlock}">
                             <Setter Property="VerticalAlignment" Value="Center" />
                             <Setter Property="Margin" Value="8" />
                         </Style>
@@ -58,23 +72,29 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="H" Grid.Row="0" />
-                    <TextBlock Text="K" Grid.Row="1" />
-                    <TextBlock Text="Sz" Grid.Row="2" />
-                    <TextBlock Text="Cs" Grid.Row="3" />
-                    <TextBlock Text="P" Grid.Row="4" />
-                    <TextBlock Text="Sz" Grid.Row="5" />
-                    <TextBlock Text="V" Grid.Row="6" />
+                    <TextBlock Grid.Row="0" Text="H" />
+                    <TextBlock Grid.Row="1" Text="K" />
+                    <TextBlock Grid.Row="2" Text="Sz" />
+                    <TextBlock Grid.Row="3" Text="Cs" />
+                    <TextBlock Grid.Row="4" Text="P" />
+                    <TextBlock Grid.Row="5" Text="Sz" />
+                    <TextBlock Grid.Row="6" Text="V" />
                 </Grid>
 
-                <ItemsControl ItemsSource="{Binding Games}" Grid.Column="1" Margin="0 0 4 0">
+                <ItemsControl
+                    Grid.Column="1"
+                    Margin="0,0,4,0"
+                    ItemsSource="{Binding Games}">
                     <ItemsControl.Resources>
                         <converters:GridRowMarginConverter x:Key="MarginConverter" />
                     </ItemsControl.Resources>
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <UniformGrid Rows="14" Columns="15" HorizontalAlignment="Stretch" />
+                            <UniformGrid
+                                HorizontalAlignment="Stretch"
+                                Columns="15"
+                                Rows="14" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
@@ -86,21 +106,29 @@
                     </ItemsControl.ItemContainerStyle>
 
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type core:GameMatch}">
-                            <controls:ReservationControl Margin="{Binding Converter={StaticResource MarginConverter}}" 
-                                                         BorderThickness="1" Width="12" Height="12"
-                                                                 CornerRadius="1"
-                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                 IsBusy="{Binding Busy}" IsActive="{Binding Enabled}" IsWatching="{Binding Watching}"
-                                                                 WatchingChangedCommand="{Binding DataContext.WatchingChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                 WatchingChangedCommandParameter="{Binding}"
-                                                                 Background="#5efc82" BorderBrush="#00c853"
-                                                                 BusyBackground="#f05545" BusyBorderBrush="#b71c1c">
+                        <DataTemplate DataType="{x:Type vm:GameViewModel}">
+                            <controls:ReservationControl
+                                Width="12"
+                                Height="12"
+                                Margin="{Binding Converter={StaticResource MarginConverter}}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Background="#5efc82"
+                                BorderBrush="#00c853"
+                                BorderThickness="1"
+                                BusyBackground="#f05545"
+                                BusyBorderBrush="#b71c1c"
+                                CornerRadius="1"
+                                IsActive="{Binding Enabled}"
+                                IsBusy="{Binding Busy}"
+                                IsWatching="{Binding Watching}"
+                                WatchingChangedCommand="{Binding DataContext.WatchingChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                WatchingChangedCommandParameter="{Binding}">
                                 <controls:ReservationControl.ToolTip>
                                     <TextBlock>
-                                                <Run Text="{Binding StartTime, StringFormat='HH:mm'}" />
-                                                <Run Text="-" />
-                                                <Run Text="{Binding EndTime, StringFormat='HH:mm'}" />
+                                        <Run Text="{Binding StartTime, StringFormat='HH:mm'}" />
+                                        <Run Text="-" />
+                                        <Run Text="{Binding EndTime, StringFormat='HH:mm'}" />
                                     </TextBlock>
                                 </controls:ReservationControl.ToolTip>
                             </controls:ReservationControl>

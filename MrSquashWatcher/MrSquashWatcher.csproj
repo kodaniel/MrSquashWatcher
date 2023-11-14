@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MrSquash.Controls\MrSquash.Controls.csproj" />
-    <ProjectReference Include="..\MrSquash.Services.Famulus\MrSquash.Services.Famulus.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,10 +45,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>user.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using MrSquash.Core;
-using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
@@ -13,8 +11,8 @@ namespace MrSquashWatcher.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            GameMatch gm = (GameMatch)value;
-            if (gm.Row % 2 == 0)
+            var game = (GameViewModel)value;
+            if (game.Row % 2 == 0)
                 return new Thickness(mingap, gap, mingap, mingap);
             else
                 return new Thickness(mingap, mingap, mingap, gap);
