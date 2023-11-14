@@ -1,4 +1,5 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+﻿using H.NotifyIcon;
+using H.NotifyIcon.Core;
 using Microsoft.Win32;
 using MrSquash.Core;
 using MrSquash.Core.Events;
@@ -94,7 +95,7 @@ namespace MrSquashWatcher
                     var info = culture.DateTimeFormat;
                     var msg = $"{info.DayNames[(int)gm.StartTime.DayOfWeek].FirstCharToUpper()}, {gm.StartTime.ToString("HH")} óra";
 
-                    App.TaskBarIcon.ShowBalloonTip("Pálya felszabadult", msg, BalloonIcon.Info);
+                    App.TaskBarIcon.ShowNotification("Pálya felszabadult", msg, NotificationIcon.Info);
                     App.TaskBarIcon.Icon = Resources.icon_active;
                 }
                 catch
@@ -104,7 +105,7 @@ namespace MrSquashWatcher
 
             _eventAggregator.GetEvent<ErrorEvent>().Subscribe(ex =>
             {
-                App.TaskBarIcon.ShowBalloonTip("Hiba", ex.Message, BalloonIcon.Error);
+                App.TaskBarIcon.ShowNotification("Hiba", ex.Message, NotificationIcon.Error);
             });
 
             App.TaskBarIcon.Icon = Resources.icon;

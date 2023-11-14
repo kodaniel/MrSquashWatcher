@@ -1,4 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+﻿using H.NotifyIcon;
 using Prism.Ioc;
 using System.Threading;
 using System.Windows;
@@ -32,22 +32,23 @@ namespace MrSquashWatcher
         protected override Window CreateShell()
         {
             TaskBarIcon = (TaskbarIcon)FindResource("TaskbarIcon");
+            TaskBarIcon.ForceCreate();
             TaskBarIcon.DataContext = Container.Resolve<MainViewModel>();
 
             return null;
-            //return Container.Resolve<Main>();
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // Views and Viewmodels
             containerRegistry.Register<MainViewModel>();
-            //containerRegistry.RegisterForNavigation<Main, MainViewModel>();
         }
 
         private void OnApplicationExit(object sender, ExitEventArgs e)
         {
             UserSettings.Instance.Save();
+
+            TaskBarIcon?.Dispose();
         }
     }
 }
