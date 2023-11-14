@@ -21,26 +21,22 @@ namespace MrSquashWatcher
         private readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(2);
 
         private ObservableCollection<GameViewModel> _games;
-        public ObservableCollection<GameViewModel> Games =>
-            _games ?? (_games = new ObservableCollection<GameViewModel>());
+        public ObservableCollection<GameViewModel> Games => _games ??= new ObservableCollection<GameViewModel>();
 
         private DelegateCommand _refreshCommand;
-        public DelegateCommand RefreshCommand =>
-            _refreshCommand ?? (_refreshCommand = new DelegateCommand(ExecuteRefreshCommand, CanExecuteRefreshCommand));
+        public DelegateCommand RefreshCommand => _refreshCommand ??= new DelegateCommand(ExecuteRefreshCommand, CanExecuteRefreshCommand);
 
         private DelegateCommand<GameViewModel> _watchingChangedCommand;
-        public DelegateCommand<GameViewModel> WatchingChangedCommand =>
-            _watchingChangedCommand ?? (_watchingChangedCommand = new DelegateCommand<GameViewModel>(gm =>
+        public DelegateCommand<GameViewModel> WatchingChangedCommand => _watchingChangedCommand ??= new DelegateCommand<GameViewModel>(gm =>
             {
                 UserSettings.Instance.SetWatching(gm.Row, gm.Column, gm.Watching);
-            }));
+            });
 
         private DelegateCommand _exitCommand;
-        public DelegateCommand ExitCommand =>
-            _exitCommand ?? (_exitCommand = new DelegateCommand(ExecuteExitCommand));
+        public DelegateCommand ExitCommand => _exitCommand ??= new DelegateCommand(ExecuteExitCommand);
 
         private DelegateCommand _openPopupCommand;
-        public DelegateCommand OpenPopupCommand => _openPopupCommand ?? (_openPopupCommand = new DelegateCommand(ExecuteOpenPopupCommand));
+        public DelegateCommand OpenPopupCommand => _openPopupCommand ??= new DelegateCommand(ExecuteOpenPopupCommand);
 
         private bool _refresing;
         public bool Refreshing
