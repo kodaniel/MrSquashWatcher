@@ -2,6 +2,7 @@
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace MrSquashWatcher.ViewModels;
 
@@ -71,8 +72,19 @@ public class ReservationViewModel : BindableBase, IDialogAware
         }
     }
 
-    public string SelectedGameTitle =>
-        SelectedGame is not null ? $"{SelectedGame.Date:yyyy.MM.dd} {SelectedGame.StartTime:HH:mm}-{SelectedGame.EndTime:HH:mm}" : "";
+    public string SelectedGameTitle
+    {
+        get
+        {
+            if (SelectedGame == null)
+                return string.Empty;
+
+            var culture = new CultureInfo("hu-HU");
+            var info = culture.DateTimeFormat;
+            var day = info.DayNames[(int)SelectedGame.Date.DayOfWeek].FirstCharToUpper();
+            return $"{SelectedGame.Date:yyyy.MM.dd} {day} {SelectedGame.StartTime:HH:mm}-{SelectedGame.EndTime:HH:mm}";
+        }
+    }
 
     public bool IsGamePickerOpened
     {
@@ -100,7 +112,7 @@ public class ReservationViewModel : BindableBase, IDialogAware
         ReserveCommand.RaiseCanExecuteChanged();
     }
 
-    private void OnReserve()
+    private async void OnReserve()
     {
         Reservation reservation = new()
         {
@@ -112,7 +124,12 @@ public class ReservationViewModel : BindableBase, IDialogAware
             EndTime = SelectedGame.EndTime
         };
 
-        _famulusService.Reserve(reservation);
+        var result = await _famulusService.Reserve(reservation);
+
+        if (result)
+        {
+            RequestClose(new DialogResult());
+        }
     }
 
     private bool CanReserve()

@@ -1,0 +1,15 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="ReservationReservedColor" Color="#f05545" />
+    <SolidColorBrush x:Key="ReservationReservedBorderColor" Color="#b71c1c" />
+
+    <SolidColorBrush x:Key="ReservationFreeColor" Color="#64dd17" />
+    <SolidColorBrush x:Key="ReservationFreeBorderColor" Color="#00c853" />
+
+    <SolidColorBrush x:Key="ReservationSelectedColor" Color="#f9a825" />
+
+    <SolidColorBrush x:Key="ReservationHoverColor" Color="#f9a825" />
+
+    <SolidColorBrush x:Key="ReservationDisabledColor" Color="#bdbdbd" />
+
+</ResourceDictionary>
