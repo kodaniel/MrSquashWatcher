@@ -8,6 +8,7 @@ global using Newtonsoft.Json;
 
 global using MrSquashWatcher.Contracts;
 global using MrSquashWatcher.Converters;
+global using MrSquashWatcher.Extensions;
 global using MrSquashWatcher.Models;
 global using MrSquashWatcher.ViewModels;
 global using MrSquashWatcher.Services;

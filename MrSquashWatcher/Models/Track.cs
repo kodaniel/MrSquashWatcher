@@ -1,7 +1,3 @@
 ﻿namespace MrSquashWatcher.Models;
 
-public record Track
-{
-    public string Name { get; set; }
-    public List<Appointment> Times { get; set; }
-}
+public record Track(string Name, List<Appointment> Times);

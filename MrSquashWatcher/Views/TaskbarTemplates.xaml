@@ -10,10 +10,12 @@
         NoLeftClickDelay="True">
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>
+                <MenuItem Command="{Binding OpenReservationCommand}" Header="Foglalás" />
                 <MenuItem
-                    Header="Auto-Indulás"
+                    Header="Indítás a rendszerrel"
                     IsCheckable="True"
                     IsChecked="{Binding AutoStartupApplication, Mode=TwoWay}" />
+                <Separator />
                 <MenuItem Command="{Binding ExitCommand}" Header="Kilépés" />
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>

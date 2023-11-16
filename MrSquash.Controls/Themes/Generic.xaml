@@ -8,29 +8,31 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:ReservationControl}">
                     <Grid>
-                        <Border x:Name="PART_Border"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="{TemplateBinding CornerRadius}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                Margin="{TemplateBinding Padding}" />
-                        
-                        <Border x:Name="PART_ActiveBorder"
-                                Background="Transparent"
-                                CornerRadius="{TemplateBinding CornerRadius}"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                                Margin="{TemplateBinding Padding}" />
+                        <Border
+                            x:Name="PART_Border"
+                            Margin="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+                        <Border
+                            x:Name="PART_ActiveBorder"
+                            Margin="{TemplateBinding Padding}"
+                            Background="Transparent"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsWatching" Value="True">
-                            <Setter TargetName="PART_ActiveBorder" Property="BorderThickness" Value="2" />
-                            <Setter TargetName="PART_ActiveBorder" Property="BorderBrush" Value="Blue" />
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="PART_ActiveBorder" Property="BorderThickness" Value="{Binding Path=SelectedBorderThickness, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Setter TargetName="PART_ActiveBorder" Property="BorderBrush" Value="{Binding Path=SelectedBorderBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
-                        <Trigger Property="IsBusy" Value="True">
-                            <Setter TargetName="PART_Border" Property="Background" Value="{Binding Path=BusyBackground, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <Setter TargetName="PART_Border" Property="BorderBrush" Value="{Binding Path=BusyBorderBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                        <Trigger Property="IsReserved" Value="True">
+                            <Setter TargetName="PART_Border" Property="Background" Value="{Binding Path=ReservedBackground, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Setter TargetName="PART_Border" Property="BorderBrush" Value="{Binding Path=ReservedBorderBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>
                         <Trigger Property="IsActive" Value="False">
                             <Setter TargetName="PART_Border" Property="Opacity" Value="0.5" />

@@ -1,95 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MrSquash.Controls
 {
-    /// <summary>
-    /// Follow steps 1a or 1b and then 2 to use this custom control in a XAML file.
-    ///
-    /// Step 1a) Using this custom control in a XAML file that exists in the current project.
-    /// Add this XmlNamespace attribute to the root element of the markup file where it is 
-    /// to be used:
-    ///
-    ///     xmlns:MyNamespace="clr-namespace:MrSquash.Controls"
-    ///
-    ///
-    /// Step 1b) Using this custom control in a XAML file that exists in a different project.
-    /// Add this XmlNamespace attribute to the root element of the markup file where it is 
-    /// to be used:
-    ///
-    ///     xmlns:MyNamespace="clr-namespace:MrSquash.Controls;assembly=MrSquash.Controls"
-    ///
-    /// You will also need to add a project reference from the project where the XAML file lives
-    /// to this project and Rebuild to avoid compilation errors:
-    ///
-    ///     Right click on the target project in the Solution Explorer and
-    ///     "Add Reference"->"Projects"->[Select this project]
-    ///
-    ///
-    /// Step 2)
-    /// Go ahead and use your control in the XAML file.
-    ///
-    ///     <MyNamespace:CustomControl1/>
-    ///
-    /// </summary>
     public class ReservationControl : Control
     {
         private Border _button;
 
         private const string ButtonPartName = "PART_ActiveBorder";
 
-        public static readonly DependencyProperty IsBusyProperty =
-            DependencyProperty.Register(nameof(IsBusy), typeof(bool), typeof(ReservationControl), new PropertyMetadata(default(bool)));
+        public static readonly DependencyProperty IsReservedProperty =
+            DependencyProperty.Register(nameof(IsReserved), typeof(bool), typeof(ReservationControl), new PropertyMetadata(default(bool)));
 
-        public bool IsBusy
-        {
-            get => (bool)GetValue(IsBusyProperty);
-            set => SetValue(IsBusyProperty, value);
-        }
+        public static readonly DependencyProperty SelectedChangedCommandProperty =
+            DependencyProperty.Register(nameof(SelectedChangedCommand), typeof(ICommand), typeof(ReservationControl));
 
-        public static readonly DependencyProperty WatchingChangedCommandProperty =
-            DependencyProperty.Register("WatchingChangedCommand", typeof(ICommand), typeof(ReservationControl));
+        public static readonly DependencyProperty SelectedChangedCommandParameterProperty =
+            DependencyProperty.Register(nameof(SelectedChangedCommandParameter), typeof(object), typeof(ReservationControl));
 
-        public ICommand WatchingChangedCommand
-        {
-            get => (ICommand)GetValue(WatchingChangedCommandProperty);
-            set => SetValue(WatchingChangedCommandProperty, value);
-        }
-
-        public static readonly DependencyProperty WatchingChangedCommandParameterProperty =
-            DependencyProperty.Register("WatchingChangedCommandParameter", typeof(object), typeof(ReservationControl));
-
-        public object WatchingChangedCommandParameter
-        {
-            get => GetValue(WatchingChangedCommandParameterProperty);
-            set => SetValue(WatchingChangedCommandParameterProperty, value);
-        }
-
-        public static readonly DependencyProperty IsWatchingProperty =
-            DependencyProperty.Register(nameof(IsWatching), typeof(bool), typeof(ReservationControl),
+        public static readonly DependencyProperty IsSelectedProperty =
+            DependencyProperty.Register(nameof(IsSelected), typeof(bool), typeof(ReservationControl),
                 new FrameworkPropertyMetadata(default(bool), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        public bool IsWatching
-        {
-            get => (bool)GetValue(IsWatchingProperty);
-            set => SetValue(IsWatchingProperty, value);
-        }
+        public static readonly DependencyProperty SelectedBorderBrushProperty =
+            DependencyProperty.Register(nameof(SelectedBorderBrush), typeof(Brush), typeof(ReservationControl));
+
+        public static readonly DependencyProperty SelectedBorderThicknessProperty =
+            DependencyProperty.Register(nameof(SelectedBorderThickness), typeof(Thickness), typeof(ReservationControl), new PropertyMetadata(new Thickness(1)));
 
         public static readonly DependencyProperty IsActiveProperty =
             DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(ReservationControl));
+
+        public static readonly DependencyProperty ReservedBackgroundProperty =
+            DependencyProperty.Register(nameof(ReservedBackground), typeof(Brush), typeof(ReservationControl));
+
+        public static readonly DependencyProperty ReservedBorderBrushProperty =
+            DependencyProperty.Register(nameof(ReservedBorderBrush), typeof(Brush), typeof(ReservationControl));
+
+        public static readonly DependencyProperty CornerRadiusProperty =
+            DependencyProperty.Register(nameof(CornerRadius), typeof(CornerRadius), typeof(ReservationControl), new PropertyMetadata(new CornerRadius(0)));
+
+        public static readonly RoutedEvent CheckedClickEvent =
+            EventManager.RegisterRoutedEvent(nameof(CheckClick), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ReservationControl));
+
+        [Category("Behavior")]
+        public event RoutedEventHandler CheckClick { add { AddHandler(CheckedClickEvent, value); } remove { RemoveHandler(CheckedClickEvent, value); } }
+
+        public bool IsSelected
+        {
+            get => (bool)GetValue(IsSelectedProperty);
+            set => SetValue(IsSelectedProperty, value);
+        }
+
+        public bool IsReserved
+        {
+            get => (bool)GetValue(IsReservedProperty);
+            set => SetValue(IsReservedProperty, value);
+        }
 
         public bool IsActive
         {
@@ -97,38 +67,47 @@ namespace MrSquash.Controls
             set => SetValue(IsActiveProperty, value);
         }
 
-        public static readonly DependencyProperty BusyBackgroundProperty =
-            DependencyProperty.Register(nameof(BusyBackground), typeof(Brush), typeof(ReservationControl));
-
-        public Brush BusyBackground
+        public ICommand SelectedChangedCommand
         {
-            get => (Brush)GetValue(BusyBackgroundProperty);
-            set => SetValue(BusyBackgroundProperty, value);
+            get => (ICommand)GetValue(SelectedChangedCommandProperty);
+            set => SetValue(SelectedChangedCommandProperty, value);
         }
 
-        public static readonly DependencyProperty BusyBorderBrushProperty =
-            DependencyProperty.Register(nameof(BusyBorderBrush), typeof(Brush), typeof(ReservationControl));
-
-        public Brush BusyBorderBrush
+        public object SelectedChangedCommandParameter
         {
-            get => (Brush)GetValue(BusyBorderBrushProperty);
-            set => SetValue(BusyBorderBrushProperty, value);
+            get => GetValue(SelectedChangedCommandParameterProperty);
+            set => SetValue(SelectedChangedCommandParameterProperty, value);
         }
 
-        public static readonly DependencyProperty CornerRadiusProperty =
-            DependencyProperty.Register(nameof(CornerRadius), typeof(CornerRadius), typeof(ReservationControl), new PropertyMetadata(new CornerRadius(0)));
+        public Brush SelectedBorderBrush
+        {
+            get => (Brush)GetValue(SelectedBorderBrushProperty);
+            set => SetValue(SelectedBorderBrushProperty, value);
+        }
+
+        public Thickness SelectedBorderThickness
+        {
+            get => (Thickness)GetValue(SelectedBorderThicknessProperty);
+            set => SetValue(SelectedBorderThicknessProperty, value);
+        }
+
+        public Brush ReservedBackground
+        {
+            get => (Brush)GetValue(ReservedBackgroundProperty);
+            set => SetValue(ReservedBackgroundProperty, value);
+        }
+
+        public Brush ReservedBorderBrush
+        {
+            get => (Brush)GetValue(ReservedBorderBrushProperty);
+            set => SetValue(ReservedBorderBrushProperty, value);
+        }
 
         public CornerRadius CornerRadius
         {
             get => (CornerRadius)GetValue(CornerRadiusProperty);
             set => SetValue(CornerRadiusProperty, value);
         }
-
-        public static readonly RoutedEvent CheckedClickEvent =
-            EventManager.RegisterRoutedEvent("CheckClick", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ReservationControl));
-
-        [Category("Behavior")]
-        public event RoutedEventHandler CheckClick { add { AddHandler(CheckedClickEvent, value); } remove { RemoveHandler(CheckedClickEvent, value); } }
 
         static ReservationControl()
         {
@@ -149,15 +128,15 @@ namespace MrSquash.Controls
 
         private void OnLeftClick(object sender, MouseButtonEventArgs e)
         {
-            this.IsWatching = !this.IsWatching;
+            this.IsSelected = !this.IsSelected;
 
             var newEvent = new RoutedEventArgs(CheckedClickEvent, this);
             RaiseEvent(newEvent);
 
-            if (this.WatchingChangedCommand != null)
+            if (this.SelectedChangedCommand != null)
             {
-                if (this.WatchingChangedCommand.CanExecute(WatchingChangedCommandParameter))
-                    this.WatchingChangedCommand.Execute(WatchingChangedCommandParameter);
+                if (this.SelectedChangedCommand.CanExecute(SelectedChangedCommandParameter))
+                    this.SelectedChangedCommand.Execute(SelectedChangedCommandParameter);
             }
         }
     }

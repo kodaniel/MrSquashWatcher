@@ -1,85 +1,68 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-
-namespace MrSquashWatcher
+﻿namespace MrSquashWatcher
 {
     public class UserSettings
     {
-        private List<Cell> gridWatchings = new List<Cell>();
+        private record struct Cell(int Row, int Column);
 
-        private static UserSettings _instance;
-        public static UserSettings Instance => _instance ?? (_instance = new UserSettings());
+        private static Lazy<UserSettings> _instance = new Lazy<UserSettings>(() => new UserSettings());
+        public static UserSettings Instance => _instance.Value;
 
         private UserSettings()
         {
+        }
 
+        private HashSet<Cell> _selectedGrids = new HashSet<Cell>();
+
+        public string Name
+        {
+            get => user.Default.name;
+            private set => user.Default.name = value;
+        }
+
+        public string Email
+        {
+            get => user.Default.email;
+            private set => user.Default.email = value;
+        }
+
+        public string Phone
+        {
+            get => user.Default.phone;
+            private set => user.Default.phone = value;
+        }
+
+        public void SetUser(string name, string email, string phone)
+        {
+            Name = name;
+            Email = email; 
+            Phone = phone;
         }
 
         public void Load()
         {
-            try
-            {
-                gridWatchings = JsonConvert.DeserializeObject<List<Cell>>(user.Default.watchinggames) ?? new List<Cell>();
-            }
-            catch
-            {
-
-            }
+            _selectedGrids = JsonConvert.DeserializeObject<HashSet<Cell>>(user.Default.watchinggames) ?? new HashSet<Cell>();
         }
 
         public void Save()
         {
-            try
-            {
-                string output = JsonConvert.SerializeObject(gridWatchings);
-                user.Default.watchinggames = output;
-                user.Default.Save();
-            }
-            catch
-            {
-
-            }
+            string output = JsonConvert.SerializeObject(_selectedGrids);
+            user.Default.watchinggames = output;
+            user.Default.Save();
         }
 
         public bool IsWatching(int row, int column)
         {
-            return gridWatchings.Contains(new Cell(row, column));
+            return _selectedGrids.Contains(new Cell(row, column));
         }
 
-        public void SetWatching(int row, int column, bool value)
+        public void SetSelected(int row, int column, bool value)
         {
             var c = new Cell(row, column);
 
             if (value)
-            {
-                if (!gridWatchings.Contains(c))
-                    gridWatchings.Add(c);
-            }
+                _selectedGrids.Add(c);
             else
-            {
-                gridWatchings.Remove(c);
-            }
-        }
-
-        private class Cell : IEquatable<Cell>
-        {
-            public int Row { get; set; }
-            public int Col { get; set; }
-
-            public Cell(int r, int c)
-            {
-                Row = r;
-                Col = c;
-            }
-
-            public bool Equals([AllowNull] Cell other)
-            {
-                return Row == other.Row && Col == other.Col;
-            }
+                _selectedGrids.Remove(c);
         }
     }
 }

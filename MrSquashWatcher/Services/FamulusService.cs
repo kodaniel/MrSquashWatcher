@@ -5,33 +5,13 @@ namespace MrSquashWatcher.Services;
 
 internal class FamulusService : IFamulusService
 {
+    private const int SQUASH_TYPE_ID = 2;
     private HttpClient _client;
 
     public FamulusService()
     {
         _client = new();
         _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-    }
-
-    public async Task<IEnumerable<Day>> FetchCurrentWeek()
-    {
-        var values = new Dictionary<string, string>()
-        {
-            { "type_id", "2" }
-        };
-
-        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/change_type";
-        var content = new FormUrlEncodedContent(values);
-
-        var response = await _client.PostAsync(url, content);
-        if (!response.IsSuccessStatusCode)
-            return null;
-
-        var body = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrWhiteSpace(body))
-            return null;
-
-        return ParseResponse(body);
     }
 
     public async Task<bool> Reserve(Reservation reservation)
@@ -43,7 +23,7 @@ internal class FamulusService : IFamulusService
             { "email", reservation.Email },
             { "phone", reservation.Phone },
             { "comment", reservation.Comment },
-            { "start_date", reservation.StartDate.ToString("YYYY-MM-dd") },
+            { "start_date", reservation.StartDate.ToString("yyyy-MM-dd") },
             { "start_time", reservation.StartTime.ToString("HH:mm") },
             { "end_time", reservation.EndTime.ToString("HH:mm") },
         };
@@ -56,6 +36,27 @@ internal class FamulusService : IFamulusService
         //    return false;
 
         return true;
+    }
+
+    public async Task<IEnumerable<Day>> FetchCurrentWeek()
+    {
+        var values = new Dictionary<string, string>()
+        {
+            { "type_id", $"{SQUASH_TYPE_ID}" }
+        };
+
+        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/change_type";
+        var content = new FormUrlEncodedContent(values);
+
+        var response = await _client.PostAsync(url, content);
+        if (!response.IsSuccessStatusCode)
+            return new List<Day>();
+
+        var body = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(body))
+            return new List<Day>();
+
+        return ParseResponse(body);
     }
 
     private IEnumerable<Day> ParseResponse(string jsonText)

@@ -42,10 +42,12 @@ namespace MrSquashWatcher
         {
             // Views and Viewmodels
             container.Register<MainViewModel>();
+            container.RegisterDialog<ReservationWindow, ReservationViewModel>("reservation");
 
             // Services
             container.Register<IStartupService, StartupService>();
             container.Register<IFamulusService, FamulusService>();
+            container.RegisterSingleton<IGamesManager, GamesManager>();
         }
 
         private void OnApplicationExit(object sender, ExitEventArgs e)

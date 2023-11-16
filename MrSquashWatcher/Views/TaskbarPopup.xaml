@@ -34,17 +34,14 @@
                         <Button
                             Width="30"
                             Height="30"
-                            materialDesign:ButtonProgressAssist.IsIndeterminate="True"
-                            materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding Refreshing}"
-                            materialDesign:RippleAssist.IsDisabled="True"
                             Background="Transparent"
                             BorderBrush="Transparent"
-                            Command="{Binding RefreshCommand}"
+                            Command="{Binding OpenReservationCommand}"
                             Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
                             <materialDesign:PackIcon
                                 Width="24"
                                 Height="24"
-                                Kind="Refresh" />
+                                Kind="Calendar" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -116,14 +113,16 @@
                                 Background="#5efc82"
                                 BorderBrush="#00c853"
                                 BorderThickness="1"
-                                BusyBackground="#f05545"
-                                BusyBorderBrush="#b71c1c"
+                                ReservedBackground="#f05545"
+                                ReservedBorderBrush="#b71c1c"
                                 CornerRadius="1"
                                 IsActive="{Binding Enabled}"
-                                IsBusy="{Binding Busy}"
-                                IsWatching="{Binding Watching}"
-                                WatchingChangedCommand="{Binding DataContext.WatchingChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                WatchingChangedCommandParameter="{Binding}">
+                                IsReserved="{Binding Reserved}"
+                                IsSelected="{Binding Selected}"
+                                SelectedBorderBrush="Blue"
+                                SelectedBorderThickness="2"
+                                SelectedChangedCommand="{Binding DataContext.SelectedChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                SelectedChangedCommandParameter="{Binding}">
                                 <controls:ReservationControl.ToolTip>
                                     <TextBlock>
                                         <Run Text="{Binding StartTime, StringFormat='HH:mm'}" />
