@@ -1,28 +1,25 @@
-﻿using System.ComponentModel;
+﻿using Prism.Events;
+using System.ComponentModel;
 using System.Threading;
-using System.Windows.Threading;
 
 namespace MrSquashWatcher.Services;
 
 internal class GamesManager : IGamesManager, IDisposable
 {
+    private readonly IEventAggregator _eventAggregator;
     private readonly IFamulusService _famulusService;
-    private readonly Dispatcher _uiDispatcher;
     private readonly BackgroundWorker _worker;
 
     private Dictionary<(int, int), GameViewModel> _games;
     private TimeSpan RefreshInterval = TimeSpan.FromMinutes(2);
     private CancellationTokenSource _cts;
 
-    public event EventHandler<GameUpdatedEventArgs> Updated;
-
     public IReadOnlyCollection<GameViewModel> Games => _games.Values;
 
-    public GamesManager(IFamulusService famulusService)
+    public GamesManager(IEventAggregator eventAggregator, IFamulusService famulusService)
     {
+        _eventAggregator = eventAggregator;
         _famulusService = famulusService;
-
-        _uiDispatcher = Dispatcher.CurrentDispatcher;
 
         _games = new Dictionary<(int, int), GameViewModel>(210);
 
@@ -56,11 +53,8 @@ internal class GamesManager : IGamesManager, IDisposable
         var days = await _famulusService.FetchCurrentWeek();
         if (!days.Any())
         {
-            _uiDispatcher.Invoke(delegate
-            {
-                Updated?.Invoke(this, new GameUpdatedEventArgs("Nem sikerült letölteni a pályafoglaltságot."));
-            });
-
+            const string errorMsg = "Nem sikerült letölteni a pályafoglaltságot.";
+            _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(errorMsg));
             return;
         }
 
@@ -105,10 +99,7 @@ internal class GamesManager : IGamesManager, IDisposable
             }
         }
 
-        _uiDispatcher.Invoke(delegate
-        {
-            Updated?.Invoke(this, new GameUpdatedEventArgs(freedAppointments));
-        });
+        _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(freedAppointments));
     }
 
     public void Dispose()

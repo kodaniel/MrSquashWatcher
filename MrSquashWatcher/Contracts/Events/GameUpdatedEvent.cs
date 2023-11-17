@@ -2,6 +2,6 @@
 
 namespace MrSquashWatcher.Contracts.Events;
 
-public class GameChangedEvent : PubSubEvent<GameViewModel>
+public class GameUpdatedEvent : PubSubEvent<GameUpdatedEventArgs>
 {
 }

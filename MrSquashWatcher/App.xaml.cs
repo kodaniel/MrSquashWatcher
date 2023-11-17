@@ -50,8 +50,19 @@ namespace MrSquashWatcher
             container.RegisterSingleton<IGamesManager, GamesManager>();
         }
 
+        protected override void Initialize()
+        {
+            base.Initialize();
+
+            var gamesManager = Container.Resolve<IGamesManager>();
+            gamesManager.Start();
+        }
+
         private void OnApplicationExit(object sender, ExitEventArgs e)
         {
+            var gamesManager = Container.Resolve<IGamesManager>();
+            gamesManager.Stop();
+
             UserSettings.Instance.Save();
 
             TaskBarIcon?.Dispose();

@@ -1,6 +1,7 @@
 ﻿using H.NotifyIcon.Core;
 using MrSquashWatcher.Properties;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System.Collections.ObjectModel;
@@ -12,6 +13,8 @@ namespace MrSquashWatcher;
 public class MainViewModel : BindableBase
 {
     private static bool ReservationDialogOpened = false;
+
+    private readonly IEventAggregator _eventAggregator;
     private readonly IGamesManager _gamesManager;
     private readonly IStartupService _startupService;
     private readonly IDialogService _dialogService;
@@ -50,18 +53,19 @@ public class MainViewModel : BindableBase
     public int Week => Games.Any() ?
         CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(Games.First().Date.ToDateTime(TimeOnly.MinValue), CalendarWeekRule.FirstDay, DayOfWeek.Monday) : 0;
 
-    public MainViewModel(IGamesManager gamesManager, IStartupService startupService, IDialogService dialogService)
+    public MainViewModel(IEventAggregator eventAggregator, IGamesManager gamesManager, IStartupService startupService, IDialogService dialogService)
     {
+        _eventAggregator = eventAggregator;
         _gamesManager = gamesManager;
         _startupService = startupService;
         _dialogService = dialogService;
-        _gamesManager.Updated += OnGamesUpdated;
-        _gamesManager.Start();
 
-        App.TaskBarIcon.Icon = Resources.icon;
+        _eventAggregator.GetEvent<GameUpdatedEvent>().Subscribe(OnGamesUpdated, ThreadOption.UIThread);
+
+        App.TaskBarIcon.Icon = Resources.trayicon;
     }
 
-    private void OnGamesUpdated(object sender, GameUpdatedEventArgs e)
+    private void OnGamesUpdated(GameUpdatedEventArgs e)
     {
         if (e.Success)
         {
@@ -84,7 +88,7 @@ public class MainViewModel : BindableBase
         if (!games.Any())
             return;
 
-        App.TaskBarIcon.Icon = Resources.icon_active;
+        App.TaskBarIcon.Icon = Resources.trayicon_active;
 
         foreach (GameViewModel game in games)
         {
@@ -123,7 +127,7 @@ public class MainViewModel : BindableBase
 
     private void ExecuteOpenPopupCommand()
     {
-        App.TaskBarIcon.Icon = Resources.icon;
+        App.TaskBarIcon.Icon = Resources.trayicon;
     }
 
     private void ExecuteExitCommand()
