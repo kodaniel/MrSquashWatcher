@@ -1,18 +1,17 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
-using System.Collections.ObjectModel;
 using System.Globalization;
 
 namespace MrSquashWatcher.ViewModels;
 
 public class ReservationViewModel : BindableBase, IDialogAware
 {
-    private readonly IGamesManager _gamesManager;
     private readonly IFamulusService _famulusService;
 
-    private bool _isGamePickerOpened = false;
-    private GameViewModel _selectedGame;
+    private GameViewModel _game;
+    private bool _isSubmitting;
+    private bool? _reservationResult = null;
     private string _name;
     private string _email;
     private string _phone;
@@ -51,85 +50,68 @@ public class ReservationViewModel : BindableBase, IDialogAware
         }
     }
 
-    public ObservableCollection<GameViewModel> _games;
-    public ObservableCollection<GameViewModel> Games => _games ??= new ObservableCollection<GameViewModel>();
-
-    public GameViewModel SelectedGame
-    {
-        get => _selectedGame;
-        private set
-        {
-            var oldSelectedGame = _selectedGame;
-            SetProperty(ref _selectedGame, value);
-
-            if (oldSelectedGame != null)
-                oldSelectedGame.Selected = false;
-            if (_selectedGame != null)
-                _selectedGame.Selected = true;
-
-            RaisePropertyChanged(nameof(SelectedGameTitle));
-            ReserveCommand.RaiseCanExecuteChanged();
-        }
-    }
-
-    public string SelectedGameTitle
+    public string Appointment
     {
         get
         {
-            if (SelectedGame == null)
-                return string.Empty;
-
             var culture = new CultureInfo("hu-HU");
             var info = culture.DateTimeFormat;
-            var day = info.DayNames[(int)SelectedGame.Date.DayOfWeek].FirstCharToUpper();
-            return $"{SelectedGame.Date:yyyy.MM.dd} {day} {SelectedGame.StartTime:HH:mm}-{SelectedGame.EndTime:HH:mm}";
+            var day = info.DayNames[(int)_game.Date.DayOfWeek].FirstCharToUpper();
+            return $"{_game.Date:yyyy.MM.dd} {day} {_game.StartTime:HH:mm}-{_game.EndTime:HH:mm}";
         }
     }
 
-    public bool IsGamePickerOpened
+    public bool IsSubmitting
     {
-        get => _isGamePickerOpened;
-        set => SetProperty(ref _isGamePickerOpened, value);
+        get => _isSubmitting;
+        set
+        {
+            if (SetProperty(ref _isSubmitting, value))
+                ReserveCommand.RaiseCanExecuteChanged();
+        }
     }
 
-    public DelegateCommand<GameViewModel> SelectCommand { get; }
+    public bool? ReservationResult
+    {
+        get => _reservationResult;
+        set => SetProperty(ref _reservationResult, value);
+    }
 
     public DelegateCommand ReserveCommand { get; }
 
-    public ReservationViewModel(IGamesManager gamesManager, IFamulusService famulusService)
+    public DelegateCommand CloseCommand { get; }
+
+    public ReservationViewModel(IFamulusService famulusService)
     {
-        _gamesManager = gamesManager;
         _famulusService = famulusService;
 
         ReserveCommand = new DelegateCommand(OnReserve, CanReserve);
-        SelectCommand = new DelegateCommand<GameViewModel>(OnSelectGame, g => g.Enabled && !g.Reserved);
-    }
-
-    private void OnSelectGame(GameViewModel game)
-    {
-        IsGamePickerOpened = false;
-        SelectedGame = game;
-        ReserveCommand.RaiseCanExecuteChanged();
+        CloseCommand = new DelegateCommand(() => RequestClose(new DialogResult(ButtonResult.Cancel)));
     }
 
     private async void OnReserve()
     {
+        IsSubmitting = true;
         Reservation reservation = new()
         {
             Name = Name,
             Email = Email,
             Phone = Phone,
-            StartDate = SelectedGame.Date,
-            StartTime = SelectedGame.StartTime,
-            EndTime = SelectedGame.EndTime
+            StartDate = _game.Date,
+            StartTime = _game.StartTime,
+            EndTime = _game.EndTime
         };
 
-        var result = await _famulusService.Reserve(reservation);
+        ReservationResult = await _famulusService.Reserve(reservation);
+        await Task.Delay(1000);
+        IsSubmitting = false;
 
-        if (result)
+        if (ReservationResult == true)
         {
-            RequestClose(new DialogResult());
+            //RequestClose(new DialogResult());
         }
+
+        ReservationResult = null;
     }
 
     private bool CanReserve()
@@ -140,47 +122,23 @@ public class ReservationViewModel : BindableBase, IDialogAware
             return false;
         if (string.IsNullOrWhiteSpace(Phone))
             return false;
-        if (SelectedGame is null)
-            return false;
 
-        return SelectedGame.Enabled && !SelectedGame.Reserved;
+        return _game.Enabled && !_game.Reserved && !IsSubmitting;
     }
 
     public void OnDialogOpened(IDialogParameters parameters)
     {
+        _game = parameters.GetValue<GameViewModel>("game") ?? throw new ArgumentNullException("game");
+
         Name = UserSettings.Instance.Name;
         Email = UserSettings.Instance.Email;
         Phone = UserSettings.Instance.Phone;
-
-        // Extract params
-        var selectedByDefault = parameters.GetValue<GameViewModel>("selected");
-
-        PopulateGames(_gamesManager.Games, selectedByDefault);
-
-        SelectedGame = _games.FirstOrDefault(g => g.Selected);
     }
 
-    public bool CanCloseDialog()
-    {
-        return true;
-    }
+    public bool CanCloseDialog() => true;
 
     public void OnDialogClosed()
     {
         UserSettings.Instance.SetUser(Name, Email, Phone);
-    }
-
-    private void PopulateGames(IEnumerable<GameViewModel> games, GameViewModel selected)
-    {
-        _games = new ObservableCollection<GameViewModel>();
-        foreach (var game in games)
-        {
-            var newGame = (GameViewModel)game.Clone();
-
-            newGame.Selected = game == selected;
-            newGame.Enabled = game.Enabled && !game.Reserved;
-
-            _games.Add(newGame);
-        }
     }
 }

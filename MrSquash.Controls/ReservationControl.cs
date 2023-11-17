@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,11 +16,11 @@ namespace MrSquash.Controls
         public static readonly DependencyProperty IsReservedProperty =
             DependencyProperty.Register(nameof(IsReserved), typeof(bool), typeof(ReservationControl), new PropertyMetadata(default(bool)));
 
-        public static readonly DependencyProperty SelectedChangedCommandProperty =
-            DependencyProperty.Register(nameof(SelectedChangedCommand), typeof(ICommand), typeof(ReservationControl));
+        public static readonly DependencyProperty CommandProperty =
+            DependencyProperty.Register(nameof(Command), typeof(ICommand), typeof(ReservationControl));
 
-        public static readonly DependencyProperty SelectedChangedCommandParameterProperty =
-            DependencyProperty.Register(nameof(SelectedChangedCommandParameter), typeof(object), typeof(ReservationControl));
+        public static readonly DependencyProperty CommandParameterProperty =
+            DependencyProperty.Register(nameof(CommandParameter), typeof(object), typeof(ReservationControl));
 
         public static readonly DependencyProperty IsSelectedProperty =
             DependencyProperty.Register(nameof(IsSelected), typeof(bool), typeof(ReservationControl),
@@ -67,16 +68,16 @@ namespace MrSquash.Controls
             set => SetValue(IsActiveProperty, value);
         }
 
-        public ICommand SelectedChangedCommand
+        public ICommand Command
         {
-            get => (ICommand)GetValue(SelectedChangedCommandProperty);
-            set => SetValue(SelectedChangedCommandProperty, value);
+            get => (ICommand)GetValue(CommandProperty);
+            set => SetValue(CommandProperty, value);
         }
 
-        public object SelectedChangedCommandParameter
+        public object CommandParameter
         {
-            get => GetValue(SelectedChangedCommandParameterProperty);
-            set => SetValue(SelectedChangedCommandParameterProperty, value);
+            get => GetValue(CommandParameterProperty);
+            set => SetValue(CommandParameterProperty, value);
         }
 
         public Brush SelectedBorderBrush
@@ -117,27 +118,33 @@ namespace MrSquash.Controls
         public override void OnApplyTemplate()
         {
             if (_button != null)
+            {
                 _button.MouseLeftButtonDown -= OnLeftClick;
+                _button.MouseRightButtonDown -= OnRightClick;
+            }
 
             _button = GetTemplateChild(ButtonPartName) as Border;
-            if (_button != null)
-                _button.MouseLeftButtonDown += OnLeftClick;
+            _button.MouseLeftButtonDown += OnLeftClick;
+            _button.MouseRightButtonDown += OnRightClick;
 
             base.OnApplyTemplate();
         }
 
         private void OnLeftClick(object sender, MouseButtonEventArgs e)
         {
-            this.IsSelected = !this.IsSelected;
-
             var newEvent = new RoutedEventArgs(CheckedClickEvent, this);
             RaiseEvent(newEvent);
 
-            if (this.SelectedChangedCommand != null)
+            if (this.Command != null)
             {
-                if (this.SelectedChangedCommand.CanExecute(SelectedChangedCommandParameter))
-                    this.SelectedChangedCommand.Execute(SelectedChangedCommandParameter);
+                if (this.Command.CanExecute(CommandParameter))
+                    this.Command.Execute(CommandParameter);
             }
+        }
+
+        private void OnRightClick(object sender, MouseButtonEventArgs e)
+        {
+            this.IsSelected = !this.IsSelected;
         }
     }
 }

@@ -31,6 +31,7 @@ internal class FamulusService : IFamulusService
         var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/save";
         var content = new FormUrlEncodedContent(values);
 
+        await Task.Delay(1000);
         //var response = await _client.PostAsync(url, content);
         //if (!response.IsSuccessStatusCode)
         //    return false;
@@ -46,6 +47,28 @@ internal class FamulusService : IFamulusService
         };
 
         var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/change_type";
+        var content = new FormUrlEncodedContent(values);
+
+        var response = await _client.PostAsync(url, content);
+        if (!response.IsSuccessStatusCode)
+            return new List<Day>();
+
+        var body = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(body))
+            return new List<Day>();
+
+        return ParseResponse(body);
+    }
+
+    public async Task<IEnumerable<Day>> FetchNextWeek(DateOnly date)
+    {
+        var values = new Dictionary<string, string>()
+        {
+            { "type_id", $"{SQUASH_TYPE_ID}" },
+            { "date", date.ToString("yyyy-MM-dd") }
+        };
+
+        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/next_week";
         var content = new FormUrlEncodedContent(values);
 
         var response = await _client.PostAsync(url, content);

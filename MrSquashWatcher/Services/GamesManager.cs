@@ -1,4 +1,5 @@
 ﻿using Prism.Events;
+using Prism.Ioc;
 using System.ComponentModel;
 using System.Threading;
 
@@ -36,6 +37,11 @@ internal class GamesManager : IGamesManager, IDisposable
     public void Stop()
     {
         _cts?.Cancel();
+    }
+
+    public void FetchNextWeek(DateOnly date)
+    {
+
     }
 
     private void DoWork(object sender, DoWorkEventArgs e)
@@ -81,7 +87,7 @@ internal class GamesManager : IGamesManager, IDisposable
                     }
                     else
                     {
-                        gm = new();
+                        gm = ContainerLocator.Container.Resolve<GameViewModel>();
                         gm.Date = day.Date;
                         gm.StartTime = appointment.StartTime;
                         gm.EndTime = appointment.EndTime;

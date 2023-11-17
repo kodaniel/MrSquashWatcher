@@ -53,6 +53,10 @@ public class MainViewModel : BindableBase
     public int Week => Games.Any() ?
         CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(Games.First().Date.ToDateTime(TimeOnly.MinValue), CalendarWeekRule.FirstDay, DayOfWeek.Monday) : 0;
 
+    public DateOnly StartDate => Games.Any() ? Games.First().Date : DateOnly.MinValue;
+
+    public DateOnly EndDate => Games.Any() ? Games.Last().Date : DateOnly.MaxValue;
+
     public MainViewModel(IEventAggregator eventAggregator, IGamesManager gamesManager, IStartupService startupService, IDialogService dialogService)
     {
         _eventAggregator = eventAggregator;
@@ -73,6 +77,8 @@ public class MainViewModel : BindableBase
             Games.AddRange(_gamesManager.Games);
 
             RaisePropertyChanged(nameof(Week));
+            RaisePropertyChanged(nameof(StartDate));
+            RaisePropertyChanged(nameof(EndDate));
             OpenReservationCommand.RaiseCanExecuteChanged();
 
             ShowFreedGames(e.FreedGames);

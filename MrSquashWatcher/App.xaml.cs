@@ -42,6 +42,7 @@ namespace MrSquashWatcher
         {
             // Views and Viewmodels
             container.Register<MainViewModel>();
+            container.Register<GameViewModel>();
             container.RegisterDialog<ReservationWindow, ReservationViewModel>("reservation");
 
             // Services

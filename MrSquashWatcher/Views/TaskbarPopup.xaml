@@ -5,9 +5,11 @@
     xmlns:controls="clr-namespace:MrSquash.Controls;assembly=MrSquash.Controls"
     xmlns:converters="clr-namespace:MrSquashWatcher.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:MrSquashWatcher"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
     d:DesignHeight="400"
     d:DesignWidth="300"
@@ -24,8 +26,11 @@
                     <TextBlock
                         Margin="8"
                         VerticalAlignment="Center"
-                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                        Text="{Binding Week, StringFormat='{}{0}. hét'}" />
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}">
+                        <Run Text="{Binding StartDate, StringFormat='MM.dd', Mode=OneWay}" />
+                        <Run Text="-" />
+                        <Run Text="{Binding EndDate, StringFormat='MM.dd', Mode=OneWay}" />
+                    </TextBlock>
 
                     <StackPanel
                         Grid.Column="1"
@@ -112,22 +117,36 @@
                                 VerticalAlignment="Center"
                                 Background="{DynamicResource ReservationFreeColor}"
                                 BorderThickness="0"
+                                Command="{Binding ReserveCommand}"
                                 CornerRadius="1"
                                 IsActive="{Binding Enabled}"
                                 IsReserved="{Binding Reserved}"
                                 IsSelected="{Binding Selected}"
                                 ReservedBackground="{DynamicResource ReservationReservedColor}"
                                 SelectedBorderBrush="#000"
-                                SelectedBorderThickness="3"
-                                SelectedChangedCommand="{Binding DataContext.SelectedChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                SelectedChangedCommandParameter="{Binding}">
+                                SelectedBorderThickness="3">
                                 <controls:ReservationControl.ToolTip>
                                     <TextBlock>
-                                        <Run Text="{Binding StartTime, StringFormat='HH:mm'}" />
+                                        <Run Text="{Binding StartTime, StringFormat='HH:mm', Mode=OneWay}" />
                                         <Run Text="-" />
-                                        <Run Text="{Binding EndTime, StringFormat='HH:mm'}" />
+                                        <Run Text="{Binding EndTime, StringFormat='HH:mm', Mode=OneWay}" />
                                     </TextBlock>
                                 </controls:ReservationControl.ToolTip>
+                                <controls:ReservationControl.Style>
+                                    <Style TargetType="{x:Type controls:ReservationControl}">
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Reserved}" Value="False" />
+                                                    <Condition Binding="{Binding Enabled}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="Cursor" Value="Hand" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </controls:ReservationControl.Style>
                             </controls:ReservationControl>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
