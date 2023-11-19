@@ -256,7 +256,11 @@ public class TaskbarViewModel : BindableBase
                 .AddComboBox("selected", "Válassz pályát", "0", choices);
         }
 
-        toastBuilder.Show();
+        toastBuilder.Show(toast =>
+        {
+            toast.ExpirationTime = DateTime.Now.AddDays(1);
+            toast.Group = "freedGame";
+        });
     }
 
     private void ShowError(string message)
