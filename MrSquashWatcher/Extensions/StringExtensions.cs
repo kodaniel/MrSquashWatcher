@@ -1,4 +1,4 @@
-﻿namespace MrSquashWatcher;
+﻿namespace MrSquashWatcher.Extensions;
 
 public static class StringExtensions
 {

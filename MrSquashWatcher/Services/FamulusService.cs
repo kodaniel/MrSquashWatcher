@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using System.Net.Http;
 
 namespace MrSquashWatcher.Services;
@@ -14,8 +15,9 @@ internal class FamulusService : IFamulusService
         _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
     }
 
-    public async Task<bool> Reserve(Reservation reservation)
+    public async Task<bool> Reserve(Models.Reservation reservation, CancellationToken cancellationToken = default!)
     {
+        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/save";
         var values = new Dictionary<string, string>()
         {
             { "track_id", reservation.TrackId.ToString() },
@@ -28,58 +30,78 @@ internal class FamulusService : IFamulusService
             { "end_time", reservation.EndTime.ToString("HH:mm") },
         };
 
-        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/save";
-        var content = new FormUrlEncodedContent(values);
-
-        await Task.Delay(1000);
-        //var response = await _client.PostAsync(url, content);
-        //if (!response.IsSuccessStatusCode)
-        //    return false;
-
-        return true;
+        try
+        {
+            var content = new FormUrlEncodedContent(values);
+            await Task.Delay(1000, cancellationToken);
+            //var response = await _client.PostAsync(url, content);
+            //if (!response.IsSuccessStatusCode)
+            //    return false;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
-    public async Task<IEnumerable<Day>> FetchCurrentWeek()
+    public async Task<IEnumerable<Day>> FetchCurrentWeek(CancellationToken cancellationToken = default!)
     {
+        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/change_type";
         var values = new Dictionary<string, string>()
         {
             { "type_id", $"{SQUASH_TYPE_ID}" }
         };
 
-        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/change_type";
-        var content = new FormUrlEncodedContent(values);
+        try
+        {
+            var content = new FormUrlEncodedContent(values);
+            var response = await _client.PostAsync(url, content, cancellationToken);
 
-        var response = await _client.PostAsync(url, content);
-        if (!response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException();
+
+            var body = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(body))
+                throw new ArgumentNullException();
+
+            return ParseResponse(body);
+        }
+        catch
+        {
+            Debug.WriteLine("FetchCurrentWeek() task has been cancelled.");
             return new List<Day>();
-
-        var body = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrWhiteSpace(body))
-            return new List<Day>();
-
-        return ParseResponse(body);
+        }
     }
 
-    public async Task<IEnumerable<Day>> FetchNextWeek(DateOnly date)
+    public async Task<IEnumerable<Day>> FetchNextWeek(Week week, CancellationToken cancellationToken = default!)
     {
+        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/next_week";
         var values = new Dictionary<string, string>()
         {
             { "type_id", $"{SQUASH_TYPE_ID}" },
-            { "date", date.ToString("yyyy-MM-dd") }
+            { "date", week.StartDate.ToString("yyyy-MM-dd") }
         };
 
-        var url = "https://famulushotel.hu/ajax?do=modules/track_reservation/next_week";
-        var content = new FormUrlEncodedContent(values);
+        try
+        {
+            var content = new FormUrlEncodedContent(values);
+            var response = await _client.PostAsync(url, content, cancellationToken);
 
-        var response = await _client.PostAsync(url, content);
-        if (!response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException();
+
+            var body = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(body))
+                throw new ArgumentNullException();
+
+            return ParseResponse(body);
+        }
+        catch
+        {
+            Debug.WriteLine($"FetchNextWeek({week.StartDate.AddDays(7)}) task has been cancelled.");
             return new List<Day>();
-
-        var body = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrWhiteSpace(body))
-            return new List<Day>();
-
-        return ParseResponse(body);
+        }
     }
 
     private IEnumerable<Day> ParseResponse(string jsonText)

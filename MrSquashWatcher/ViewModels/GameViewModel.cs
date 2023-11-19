@@ -1,109 +1,39 @@
-﻿using Prism.Commands;
+﻿using MrSquashWatcher.Data;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
 
 namespace MrSquashWatcher.ViewModels;
 
-public class GameViewModel : BindableBase, ICloneable
+public class GameViewModel : BindableBase
 {
-    private readonly IDialogService _dialogService;
-    private readonly IFamulusService _famulusService;
+    private readonly Game _game;
 
-    private bool _isDialogOpened = false;
-    private int _row;
-    private int _column;
-    private DateOnly _date;
-    private TimeOnly _startTime;
-    private TimeOnly _endTime;
-    private bool _reserved;
-    private bool _enabled;
-    private bool _selected;
+    public int Row => _game.CalendarPosition.Row;
 
-    public int Row
-    {
-        get => _row;
-        set => SetProperty(ref _row, value);
-    }
+    public int Column => _game.CalendarPosition.Column;
 
-    public int Column
-    {
-        get => _column;
-        set => SetProperty(ref _column, value);
-    }
+    public int Track => _game.Track;
 
-    public DateOnly Date
-    {
-        get => _date;
-        set => SetProperty(ref _date, value);
-    }
+    public DateOnly Date => _game.Date;
 
-    public TimeOnly StartTime
-    {
-        get => _startTime;
-        set => SetProperty(ref _startTime, value);
-    }
+    public TimeOnly StartTime => _game.StartTime;
 
-    public TimeOnly EndTime
-    {
-        get => _endTime;
-        set => SetProperty(ref _endTime, value);
-    }
+    public TimeOnly EndTime => _game.EndTime;
 
-    public bool Reserved
-    {
-        get => _reserved;
-        set => SetProperty(ref _reserved, value);
-    }
+    public bool Reserved => _game.Reserved;
 
-    public bool Enabled
-    {
-        get => _enabled;
-        set => SetProperty(ref _enabled, value);
-    }
+    public bool Enabled => _game.Enabled;
 
     public bool Selected
     {
-        get => _selected;
-        set => SetProperty(ref _selected, value);
-    }
-
-    public DelegateCommand ReserveCommand { get; }
-
-    public GameViewModel(IDialogService dialogService, IFamulusService famulusService)
-    {
-        _dialogService = dialogService;
-        _famulusService = famulusService;
-
-        ReserveCommand = new DelegateCommand(OnReserve);
-    }
-
-    private void OnReserve()
-    {
-        if (!Enabled || Reserved)
-            return;
-
-        if (_isDialogOpened)
-            return;
-        _isDialogOpened = true;
-
-        var parameters = new DialogParameters
+        get => UserSettings.Instance.IsSelected(_game.CalendarPosition);
+        set
         {
-            { "game", this }
-        };
-
-        _dialogService.ShowDialog("reservation", parameters, _ =>
-        {
-            _isDialogOpened = false;
-        });
+            UserSettings.Instance.SetSelected(_game.CalendarPosition, value);
+            RaisePropertyChanged();
+        }
     }
 
-    private bool CanReserve()
-    {
-        return Enabled && !Reserved;
-    }
+    public GameViewModel(Game game) => _game = game;
 
-    public object Clone()
-    {
-        return MemberwiseClone();
-    }
+    public Game GetModel() => _game;
 }

@@ -1,7 +1,9 @@
-﻿using Prism.Events;
-using Prism.Ioc;
+﻿using MrSquashWatcher.Data;
+using Prism.Events;
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
+using System.Diagnostics;
 
 namespace MrSquashWatcher.Services;
 
@@ -11,22 +13,57 @@ internal class GamesManager : IGamesManager, IDisposable
     private readonly IFamulusService _famulusService;
     private readonly BackgroundWorker _worker;
 
-    private Dictionary<(int, int), GameViewModel> _games;
+    private ConcurrentDictionary<Week, ReadOnlyDictionary<CalendarPosition, Game>> _games;
+    private ConcurrentDictionary<Week, DateTime> _lastFetchTimes;
+#if DEBUG
+    private TimeSpan RefreshInterval = TimeSpan.FromSeconds(20);
+#else
     private TimeSpan RefreshInterval = TimeSpan.FromMinutes(2);
+#endif
     private CancellationTokenSource _cts;
-
-    public IReadOnlyCollection<GameViewModel> Games => _games.Values;
 
     public GamesManager(IEventAggregator eventAggregator, IFamulusService famulusService)
     {
         _eventAggregator = eventAggregator;
         _famulusService = famulusService;
 
-        _games = new Dictionary<(int, int), GameViewModel>(210);
+        _games = new ConcurrentDictionary<Week, ReadOnlyDictionary<CalendarPosition, Game>>();
+        _lastFetchTimes = new ConcurrentDictionary<Week, DateTime>();
 
         _worker = new BackgroundWorker();
         _worker.DoWork += DoWork;
     }
+
+    public async Task<IEnumerable<Game>> GetOrUpdateGamesOnWeek(Week week, bool forceUpdate = false, CancellationToken cancellationToken = default!)
+    {
+        if (_games.ContainsKey(week))
+            Debug.WriteLine($"Week {week.StartDate} already fetched.");
+
+        var isOutdated = (_lastFetchTimes.ContainsKey(week) && DateTime.UtcNow - _lastFetchTimes[week] > RefreshInterval);
+        if (forceUpdate || !_games.ContainsKey(week) || isOutdated)
+        {
+            var games = await FetchGamesOnWeek(week, cancellationToken);
+            
+            if (cancellationToken.IsCancellationRequested)
+                return new List<Game>();
+
+            var newGames = ConvertGamesToCalendar(games);
+            _lastFetchTimes[week] = DateTime.UtcNow;
+
+            if (_games.ContainsKey(week) && week < Week.Now.AddWeeks(UserSettings.Instance.NumOfWeeks))
+            {
+                var freedGames = CheckFreedGames(_games[week], newGames);
+                _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(freedGames));
+            }
+
+            _games[week] = newGames;
+        }
+
+        return _games[week].Values;
+    }
+
+    public IEnumerable<Game> GetGamesOnWeek(Week week) =>
+        _games.TryGetValue(week, out var gamesOnWeek) ? gamesOnWeek.Values : new List<Game>();
 
     public void Start()
     {
@@ -39,74 +76,113 @@ internal class GamesManager : IGamesManager, IDisposable
         _cts?.Cancel();
     }
 
-    public void FetchNextWeek(DateOnly date)
-    {
-
-    }
-
     private void DoWork(object sender, DoWorkEventArgs e)
     {
         while (!_cts.IsCancellationRequested)
         {
-            UpdateLayout();
+            UpdateWeeks();
             Thread.Sleep(RefreshInterval);
         }
     }
 
-    private async void UpdateLayout()
+    private async void UpdateWeeks()
     {
-        var freedAppointments = new List<GameViewModel>();
-        var days = await _famulusService.FetchCurrentWeek();
-        if (!days.Any())
+        List<Game> allFreedGames = new();
+        var currentWeek = Week.Now;
+
+        for (int i = 0; i < UserSettings.Instance.NumOfWeeks; i++)
         {
-            const string errorMsg = "Nem sikerült letölteni a pályafoglaltságot.";
-            _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(errorMsg));
-            return;
+            var oldGames = _games.GetValueOrDefault(currentWeek, new Dictionary<CalendarPosition, Game>().ToReadOnlyDictionary());
+            var games = await FetchGamesOnWeek(currentWeek, _cts.Token);
+
+            if (_cts.IsCancellationRequested)
+                return;
+
+            _lastFetchTimes[currentWeek] = DateTime.UtcNow;
+
+            if (!games.Any())
+            {
+                const string errorMsg = "Nem sikerült letölteni a pályafoglaltságot.";
+                _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(errorMsg));
+                break;
+            }
+
+            _games[currentWeek] = ConvertGamesToCalendar(games);
+
+            var freedGames = CheckFreedGames(oldGames, _games[currentWeek]);
+            allFreedGames.AddRange(freedGames);
+
+            currentWeek++;
         }
 
+        if (_cts.IsCancellationRequested)
+            return;
+
+        _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(allFreedGames));
+    }
+
+    private IEnumerable<Game> CheckFreedGames(IDictionary<CalendarPosition, Game> oldGames, IDictionary<CalendarPosition, Game> newGames)
+    {
+        foreach (var oldGamePair in oldGames)
+        {
+            var oldGame = oldGamePair.Value;
+            var newGame = newGames[oldGamePair.Key];
+
+            if (!UserSettings.Instance.IsSelected(oldGamePair.Key))
+                continue;
+
+            if (oldGame.Reserved && !newGame.Reserved && newGame.Enabled)
+            {
+                yield return newGame;
+            }
+        }
+    }
+
+    private async Task<IEnumerable<Game>> FetchGamesOnWeek(Week week, CancellationToken cancellationToken)
+    {
+        IEnumerable<Day> days;
+
+        if (Week.Now == week)
+            days = await _famulusService.FetchCurrentWeek(cancellationToken);
+        else
+            days = await _famulusService.FetchNextWeek(week - 1, cancellationToken);
+
+        return BuildGames(days);
+    }
+
+    private IEnumerable<Game> BuildGames(IEnumerable<Day> days)
+    {
         int row = 0;
         foreach (Day day in days)
         {
-            foreach (Track track in day.Tracks)
+            for (int trackId = 0; trackId < day.Tracks.Count; trackId++)
             {
-                for (int col = 0; col < track.Times.Count; col++)
+                for (int col = 0; col < day.Tracks[trackId].Times.Count; col++)
                 {
-                    Appointment appointment = track.Times[col];
+                    Appointment appointment = day.Tracks[trackId].Times[col];
 
-                    if (_games.TryGetValue((row, col), out GameViewModel gm))
+                    Game game = new()
                     {
-                        gm = _games[(row, col)];
-                        if (gm.Enabled && gm.Reserved && !appointment.Reserved) // pálya felszabadult
-                        {
-                            if (gm.Selected)
-                                freedAppointments.Add(gm);
-                        }
+                        Date = day.Date,
+                        StartTime = appointment.StartTime,
+                        EndTime = appointment.EndTime,
+                        Track = trackId,
+                        Reserved = appointment.Reserved,
+                        Enabled = appointment.Enabled,
+                        CalendarPosition = new CalendarPosition(row, col)
+                    };
 
-                        gm.Reserved = appointment.Reserved;
-                        gm.Enabled = appointment.Enabled;
-                    }
-                    else
-                    {
-                        gm = ContainerLocator.Container.Resolve<GameViewModel>();
-                        gm.Date = day.Date;
-                        gm.StartTime = appointment.StartTime;
-                        gm.EndTime = appointment.EndTime;
-                        gm.Reserved = appointment.Reserved;
-                        gm.Enabled = appointment.Enabled;
-                        gm.Row = row;
-                        gm.Column = col;
-                        gm.Selected = UserSettings.Instance.IsWatching(row, col);
-
-                        _games.Add((row, col), gm);
-                    }
+                    yield return game;
                 }
 
                 row++;
             }
         }
-
-        _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(freedAppointments));
     }
+
+    private static ReadOnlyDictionary<CalendarPosition, Game> ConvertGamesToCalendar(IEnumerable<Game> games) =>
+        new Dictionary<CalendarPosition, Game>(games.Select(game => new KeyValuePair<CalendarPosition, Game>(game.CalendarPosition, game)))
+            .ToReadOnlyDictionary();
 
     public void Dispose()
     {

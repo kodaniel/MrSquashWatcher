@@ -15,4 +15,7 @@ public record Appointment
 
     [JsonProperty(PropertyName = "enabled")]
     public bool Enabled { get; set; }
+
+    [JsonProperty(PropertyName = "price")]
+    public int Price { get; set; }
 }

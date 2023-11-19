@@ -11,21 +11,24 @@
         NoLeftClickDelay="True">
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>
-                <MenuItem Header="Beállítások" Icon="{md:PackIcon Kind=Settings}" />
+                <MenuItem
+                    Command="{x:Static local:ApplicationCommands.SettingsCommand}"
+                    Header="Beállítások"
+                    Icon="{md:PackIcon Kind=Settings}" />
                 <MenuItem
                     Header="Indítás a rendszerrel"
                     IsCheckable="True"
                     IsChecked="{Binding AutoStartupApplication, Mode=TwoWay}" />
                 <Separator />
                 <MenuItem
-                    Command="{Binding ExitCommand}"
+                    Command="{x:Static local:ApplicationCommands.ExitCommand}"
                     Header="Kilépés"
                     Icon="{md:PackIcon Kind=ExitToApp}" />
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>
 
         <tb:TaskbarIcon.TrayPopup>
-            <local:TaskbarPopup />
+            <local:CalendarPopup />
         </tb:TaskbarIcon.TrayPopup>
 
     </tb:TaskbarIcon>

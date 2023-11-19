@@ -2,6 +2,6 @@
 
 namespace MrSquashWatcher.Contracts.Events;
 
-public class ErrorEvent : PubSubEvent<Exception>
+public class OpenReservationDialogEvent : PubSubEvent<Game>
 {
 }

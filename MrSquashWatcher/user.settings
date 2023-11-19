@@ -2,17 +2,20 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MrSquashWatcher" GeneratedClassName="user">
   <Profiles />
   <Settings>
-    <Setting Name="watchinggames" Type="System.String" Scope="User">
+    <Setting Name="SelectedGames" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="name" Type="System.String" Scope="User">
+    <Setting Name="Name" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="email" Type="System.String" Scope="User">
+    <Setting Name="Email" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="phone" Type="System.String" Scope="User">
+    <Setting Name="Phone" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NumOfWeeks" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="MrSquashWatcher.TaskbarPopup"
+    x:Class="MrSquashWatcher.CalendarPopup"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:MrSquash.Controls;assembly=MrSquash.Controls"
@@ -11,6 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
+    d:DataContext="{d:DesignInstance Type={x:Type local:TaskbarViewModel}}"
     d:DesignHeight="400"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -41,12 +42,39 @@
                             Height="30"
                             Background="Transparent"
                             BorderBrush="Transparent"
-                            Command="{Binding OpenReservationCommand}"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
+                            Command="{Binding CurrentWeekCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}"
+                            ToolTip="Aktuális hét">
                             <materialDesign:PackIcon
                                 Width="24"
                                 Height="24"
-                                Kind="Calendar" />
+                                Kind="CalendarToday" />
+                        </Button>
+                        <Button
+                            Width="30"
+                            Height="30"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            Command="{Binding PreviousWeekCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}"
+                            ToolTip="Előző hét">
+                            <materialDesign:PackIcon
+                                Width="24"
+                                Height="24"
+                                Kind="SkipPrevious" />
+                        </Button>
+                        <Button
+                            Width="30"
+                            Height="30"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            Command="{Binding NextWeekCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniDarkButton}"
+                            ToolTip="Következő hét">
+                            <materialDesign:PackIcon
+                                Width="24"
+                                Height="24"
+                                Kind="SkipNext" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -86,7 +114,7 @@
                 <ItemsControl
                     Grid.Column="1"
                     Margin="0,0,4,0"
-                    ItemsSource="{Binding Games}">
+                    ItemsSource="{Binding CalendarGames}">
                     <ItemsControl.Resources>
                         <converters:GridRowMarginConverter x:Key="MarginConverter" />
                     </ItemsControl.Resources>
@@ -117,7 +145,8 @@
                                 VerticalAlignment="Center"
                                 Background="{DynamicResource ReservationFreeColor}"
                                 BorderThickness="0"
-                                Command="{Binding ReserveCommand}"
+                                Command="{Binding Path=DataContext.ReserveCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"
                                 CornerRadius="1"
                                 IsActive="{Binding Enabled}"
                                 IsReserved="{Binding Reserved}"
@@ -151,6 +180,29 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <Grid Grid.ColumnSpan="2" Visibility="{Binding IsLoadingCalendar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <materialDesign:ColorZone
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Mode="Dark"
+                        Opacity="0.75">
+                        <StackPanel>
+                            <ProgressBar
+                                Width="50"
+                                Height="50"
+                                IsIndeterminate="True"
+                                Style="{StaticResource MaterialDesignCircularProgressBar}" />
+                            <TextBlock
+                                Margin="5"
+                                FontStyle="Italic"
+                                Text="Frissítés..."
+                                TextAlignment="Center" />
+                        </StackPanel>
+                    </materialDesign:ColorZone>
+                </Grid>
             </Grid>
         </DockPanel>
     </materialDesign:Card>

@@ -1,4 +1,6 @@
 ﻿using H.NotifyIcon;
+using MrSquashWatcher.Data;
+using MrSquashWatcher.Views;
 using Prism.Ioc;
 using System.Threading;
 using System.Windows;
@@ -33,7 +35,7 @@ namespace MrSquashWatcher
         {
             TaskBarIcon = (TaskbarIcon)FindResource("TaskbarIcon");
             TaskBarIcon.ForceCreate();
-            TaskBarIcon.DataContext = Container.Resolve<MainViewModel>();
+            TaskBarIcon.DataContext = Container.Resolve<TaskbarViewModel>();
 
             return null;
         }
@@ -41,13 +43,13 @@ namespace MrSquashWatcher
         protected override void RegisterTypes(IContainerRegistry container)
         {
             // Views and Viewmodels
-            container.Register<MainViewModel>();
-            container.Register<GameViewModel>();
-            container.RegisterDialog<ReservationWindow, ReservationViewModel>("reservation");
+            container.Register<TaskbarViewModel>();
+            container.RegisterDialog<Reservation, ReservationViewModel>("reservation");
+            container.RegisterDialog<Settings, SettingsViewModel>("settings");
 
             // Services
             container.Register<IStartupService, StartupService>();
-            container.Register<IFamulusService, FamulusService>();
+            container.Register<IFamulusService, FakeFamulusService>();
             container.RegisterSingleton<IGamesManager, GamesManager>();
         }
 

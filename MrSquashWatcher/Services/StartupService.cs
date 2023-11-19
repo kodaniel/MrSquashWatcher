@@ -24,6 +24,14 @@ internal class StartupService : IStartupService
         }
     }
 
+    public void SetApplicationStartup(bool start)
+    {
+        if (start)
+            AddApplicationToStartup();
+        else
+            RemoveApplicationFromStartup();
+    }
+
     public bool IsRunApplicationOnStartup()
     {
         using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))

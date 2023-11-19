@@ -26,48 +26,60 @@ namespace MrSquashWatcher {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string watchinggames {
+        public string SelectedGames {
             get {
-                return ((string)(this["watchinggames"]));
+                return ((string)(this["SelectedGames"]));
             }
             set {
-                this["watchinggames"] = value;
+                this["SelectedGames"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string name {
+        public string Name {
             get {
-                return ((string)(this["name"]));
+                return ((string)(this["Name"]));
             }
             set {
-                this["name"] = value;
+                this["Name"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string email {
+        public string Email {
             get {
-                return ((string)(this["email"]));
+                return ((string)(this["Email"]));
             }
             set {
-                this["email"] = value;
+                this["Email"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string phone {
+        public string Phone {
             get {
-                return ((string)(this["phone"]));
+                return ((string)(this["Phone"]));
             }
             set {
-                this["phone"] = value;
+                this["Phone"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int NumOfWeeks {
+            get {
+                return ((int)(this["NumOfWeeks"]));
+            }
+            set {
+                this["NumOfWeeks"] = value;
             }
         }
     }

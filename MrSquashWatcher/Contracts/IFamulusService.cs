@@ -2,7 +2,7 @@
 
 public interface IFamulusService
 {
-    Task<IEnumerable<Day>> FetchCurrentWeek();
-    Task<IEnumerable<Day>> FetchNextWeek(DateOnly date);
-    Task<bool> Reserve(Reservation reservation);
+    Task<IEnumerable<Day>> FetchCurrentWeek(CancellationToken cancellationToken = default!);
+    Task<IEnumerable<Day>> FetchNextWeek(Week week, CancellationToken cancellationToken = default!);
+    Task<bool> Reserve(Models.Reservation reservation, CancellationToken cancellationToken = default!);
 }
