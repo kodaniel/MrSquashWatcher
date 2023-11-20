@@ -2,18 +2,22 @@
 
 internal class FamulusServiceMock : IFamulusService
 {
-    private int EmulateServiceResponseTime => new Random().Next(1000, 3000);
+    private readonly int _emulateServiceResponseTime = 0;
 
     public FamulusServiceMock()
     {
-        _ = new TimeOnly(10, 0);
+    }
+
+    public FamulusServiceMock(int responseTime)
+    {
+        _emulateServiceResponseTime = responseTime;
     }
 
     public async Task<bool> Reserve(Reservation reservation, CancellationToken cancellationToken = default!)
     {
         try
         {
-            await Task.Delay(EmulateServiceResponseTime, cancellationToken);
+            await Task.Delay(_emulateServiceResponseTime, cancellationToken);
 
             return reservation.StartDate.Day % 2 == 0;
         }
@@ -27,7 +31,7 @@ internal class FamulusServiceMock : IFamulusService
     {
         try
         {
-            await Task.Delay(EmulateServiceResponseTime, cancellationToken);
+            await Task.Delay(_emulateServiceResponseTime, cancellationToken);
 
             return PopulateWeek(Week.Now);
         }
@@ -41,7 +45,7 @@ internal class FamulusServiceMock : IFamulusService
     {
         try
         {
-            await Task.Delay(EmulateServiceResponseTime, cancellationToken);
+            await Task.Delay(_emulateServiceResponseTime, cancellationToken);
 
             return PopulateWeek(week + 1);
         }

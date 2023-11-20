@@ -20,7 +20,7 @@ public class GamesManager : IGamesManager, IDisposable
 #else
     private TimeSpan RefreshInterval = TimeSpan.FromMinutes(2);
 #endif
-    private CancellationTokenSource _cts;
+    private CancellationTokenSource _cts = null!;
 
     public GamesManager(IEventAggregator eventAggregator, IFamulusService famulusService)
     {
@@ -67,7 +67,9 @@ public class GamesManager : IGamesManager, IDisposable
 
     public void Start()
     {
+        _cts?.Cancel();
         _cts = new CancellationTokenSource();
+
         _worker.RunWorkerAsync();
     }
 

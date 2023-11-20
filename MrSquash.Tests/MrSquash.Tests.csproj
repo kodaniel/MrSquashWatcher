@@ -17,7 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MrSquash.Core\MrSquash.Application.csproj" />
+    <ProjectReference Include="..\MrSquash.Application\MrSquash.Application.csproj" />
+    <ProjectReference Include="..\MrSquash.Domain\MrSquash.Domain.csproj" />
+    <ProjectReference Include="..\MrSquash.Infrastructure\MrSquash.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
