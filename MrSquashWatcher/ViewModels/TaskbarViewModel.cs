@@ -5,7 +5,6 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
-using System.Diagnostics;
 using System.Windows;
 using Windows.Foundation.Collections;
 
@@ -111,7 +110,6 @@ public class TaskbarViewModel : BindableBase
 
     private async Task UpdateCalendar()
     {
-        Debug.WriteLine($"Updating week {CurrentWeek.StartDate}");
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource = new CancellationTokenSource();
         var token = _cancellationTokenSource.Token;
@@ -122,13 +120,11 @@ public class TaskbarViewModel : BindableBase
 
         if (token.IsCancellationRequested)
         {
-            Debug.WriteLine($"Updating week {CurrentWeek.StartDate} cancelled");
             return;
         }
 
         IsLoadingCalendar = false;
 
-        Debug.WriteLine($"Updated week {CurrentWeek.StartDate} successfully");
         _calendarGames = GamesToViewModel(games);
         RaisePropertyChanged(nameof(CalendarGames));
     }

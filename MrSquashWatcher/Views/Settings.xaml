@@ -116,7 +116,7 @@
                     <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}" Text="Verzió" />
                     <TextBlock>
                         <Hyperlink Style="{StaticResource MaterialDesignCaptionHyperlink}">
-                            2.0.0
+                            <Run Text="{Binding ApplicationVersion, Mode=OneWay}" />
                         </Hyperlink>
                     </TextBlock>
                 </StackPanel>
