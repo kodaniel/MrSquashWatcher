@@ -12,7 +12,7 @@ namespace MrSquash.Infrastructure {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
     internal sealed partial class AppUser : global::System.Configuration.ApplicationSettingsBase {
         
         private static AppUser defaultInstance = ((AppUser)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new AppUser())));
@@ -80,6 +80,18 @@ namespace MrSquash.Infrastructure {
             }
             set {
                 this["NumOfWeeks"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowNotifications {
+            get {
+                return ((bool)(this["ShowNotifications"]));
+            }
+            set {
+                this["ShowNotifications"] = value;
             }
         }
     }

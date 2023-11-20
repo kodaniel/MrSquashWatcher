@@ -7,6 +7,7 @@ public class Reservation
     public string? Email { get; set; }
     public string? Phone { get; set; }
     public string? Comment { get; set; }
+    public int Price { get; set; }
     public DateOnly StartDate { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }

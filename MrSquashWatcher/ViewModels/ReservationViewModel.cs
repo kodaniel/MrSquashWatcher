@@ -109,7 +109,8 @@ public class ReservationViewModel : BindableBase, IDialogAware
             TrackId = _game.Track,
             StartDate = _game.Date,
             StartTime = _game.StartTime,
-            EndTime = _game.EndTime
+            EndTime = _game.EndTime,
+            Price = _game.Price
         }) ? ReservationResults.Succeeded : ReservationResults.Failed;
 
         await Task.Delay(2000);

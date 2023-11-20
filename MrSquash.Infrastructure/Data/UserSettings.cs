@@ -40,6 +40,12 @@ public class UserSettings
         set => AppUser.Default.NumOfWeeks = Math.Clamp(value, 1, 4);
     }
 
+    public bool ShowNotifications
+    {
+        get => AppUser.Default.ShowNotifications;
+        set => AppUser.Default.ShowNotifications = value;
+    }
+
     public void SetUser(string name, string email, string phone)
     {
         Name = name;

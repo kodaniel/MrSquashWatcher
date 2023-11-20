@@ -162,9 +162,13 @@ public class TaskbarViewModel : BindableBase
         await UpdateCalendar();
     }
 
+    private static bool _settingsDialogOpened = false;
     private void OpenSettings()
     {
-        _dialogService.Show("settings");
+        if (_settingsDialogOpened) return;
+        _settingsDialogOpened = true;
+
+        _dialogService.ShowDialog("settings", _ => _settingsDialogOpened = false);
     }
 
     private void OpenPopup()
@@ -174,7 +178,7 @@ public class TaskbarViewModel : BindableBase
 
     private void Exit()
     {
-        ToastNotificationManagerCompat.History.Clear();
+        //ToastNotificationManagerCompat.History.Clear();
         Application.Current.Shutdown();
     }
 
@@ -218,6 +222,9 @@ public class TaskbarViewModel : BindableBase
 
         App.TaskBarIcon.Icon = Resources.trayicon_active;
 
+        if (!UserSettings.Instance.ShowNotifications)
+            return;
+
         var generateGameTitle = (Game g) => $"{g.Date:yyyy.MM.dd} {g.StartTime:HH} óra, {g.Track + 1}. pálya";
 
         var toastBuilder = new ToastContentBuilder()
@@ -228,8 +235,7 @@ public class TaskbarViewModel : BindableBase
                 .SetContent("Foglalás")
                 .AddArgument("action", "reserve")
                 .SetBackgroundActivation())
-            .SetToastDuration(ToastDuration.Long)
-            .SetToastScenario(ToastScenario.Default);
+            .SetToastScenario(ToastScenario.Reminder);
 
         if (games.Count == 1)
         {
@@ -260,6 +266,9 @@ public class TaskbarViewModel : BindableBase
 
     private void ShowError(string message)
     {
+        if (!UserSettings.Instance.ShowNotifications)
+            return;
+
         App.TaskBarIcon.ShowNotification("Hiba", message, NotificationIcon.Error);
     }
 

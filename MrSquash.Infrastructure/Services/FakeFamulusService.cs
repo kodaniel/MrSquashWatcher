@@ -6,7 +6,7 @@ public class FakeFamulusService : IFamulusService
 
     public FakeFamulusService()
     {
-        _ = new TimeOnly(10, 0);
+
     }
 
     public async Task<bool> Reserve(Reservation reservation, CancellationToken cancellationToken = default!)
@@ -15,7 +15,7 @@ public class FakeFamulusService : IFamulusService
         {
             await Task.Delay(EmulateServiceResponseTime, cancellationToken);
 
-            return reservation.StartDate.Day % 2 == 0;
+            return new Random().NextDouble() > 0.3;
         }
         catch (TaskCanceledException)
         {

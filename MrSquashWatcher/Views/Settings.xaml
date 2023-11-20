@@ -8,79 +8,135 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:sysWpf="clr-namespace:System.Windows;assembly=PresentationFramework"
     xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
     d:DesignHeight="300"
-    d:DesignWidth="400"
+    d:DesignWidth="340"
     mc:Ignorable="d">
     <prism:Dialog.WindowStyle>
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterScreen" />
             <Setter Property="ShowInTaskbar" Value="True" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
-            <Setter Property="MinWidth" Value="400" />
+            <Setter Property="MinWidth" Value="300" />
             <Setter Property="MinHeight" Value="300" />
+            <Setter Property="Width" Value="340" />
+            <Setter Property="Height" Value="300" />
+            <Setter Property="ResizeMode" Value="CanMinimize" />
         </Style>
     </prism:Dialog.WindowStyle>
 
+    <UserControl.Resources>
+        <sys:Double x:Key="RowHeight">40</sys:Double>
+        <sysWpf:GridLength x:Key="IconBoxWidth">60</sysWpf:GridLength>
+    </UserControl.Resources>
+
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-
-        <StackPanel Margin="10">
-            <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="Forecast" />
-            <Grid>
+        <StackPanel>
+            <Grid Height="{StaticResource RowHeight}" Margin="0,0,10,10">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource IconBoxWidth}" />
                     <ColumnDefinition />
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <TextBlock Text="Hetek száma" />
-                <Slider
-                    Grid.Column="1"
-                    LargeChange="1"
-                    Maximum="{x:Static data:UserSettings.MAX_WATCH_WEEKS}"
-                    Minimum="{x:Static data:UserSettings.MIN_WATCH_WEEKS}"
-                    SmallChange="1"
-                    Value="{Binding WatchWeeks}" />
 
-                <TextBlock Grid.Row="1" Text="Quiet mode" />
-                <CheckBox Grid.Row="1" Grid.Column="1" />
-
-                <TextBlock Grid.Row="2" Text="Check for updates" />
-                <CheckBox Grid.Row="2" Grid.Column="1" />
-            </Grid>
-
-            <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="About" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <TextBlock Text="Version" />
-                <TextBlock Grid.Column="1" Text="1.0.0" />
-
-                <TextBlock Grid.Row="1" Text="Author" />
+                <md:PackIcon
+                    Width="20"
+                    Height="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource MaterialDesignCheckBoxDisabled}"
+                    Kind="Notifications" />
                 <TextBlock
-                    Grid.Row="1"
                     Grid.Column="1"
-                    Text="Daniel Kovacs" />
-
-                <TextBlock Grid.Row="2" Text="Project url" />
-                <TextBlock Grid.Row="2" Grid.Column="1">
-                    <Hyperlink NavigateUri="https://github.com/">
-                        https://github.com/
-                    </Hyperlink>
-                </TextBlock>
+                    VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignBody2TextBlock}"
+                    Text="Értesítések" />
+                <ToggleButton Grid.Column="2" IsChecked="{Binding ShowNotifications}" />
             </Grid>
 
+            <Grid Height="{StaticResource RowHeight}" Margin="0,0,10,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource IconBoxWidth}" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+
+                <md:PackIcon
+                    Width="20"
+                    Height="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource MaterialDesignCheckBoxDisabled}"
+                    Kind="Monitor" />
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignBody2TextBlock}"
+                    Text="Indítás a rendszerrel" />
+                <ToggleButton Grid.Column="2" IsChecked="{Binding AutoStartupApplication}" />
+            </Grid>
+
+            <Grid Height="{StaticResource RowHeight}" Margin="0,0,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource IconBoxWidth}" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <md:PackIcon
+                    Width="20"
+                    Height="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource MaterialDesignCheckBoxDisabled}"
+                    Kind="CalendarWeek" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}" Text="Hetek előrejelzése" />
+                    <Slider
+                        LargeChange="1"
+                        Maximum="{x:Static data:UserSettings.MAX_WATCH_WEEKS}"
+                        Minimum="{x:Static data:UserSettings.MIN_WATCH_WEEKS}"
+                        SmallChange="1"
+                        Style="{StaticResource MaterialDesignDiscreteSlider}"
+                        Value="{Binding WatchWeeks}" />
+                </StackPanel>
+            </Grid>
+
+            <Separator Margin="0,10" Background="{StaticResource MaterialDesignDarkSeparatorBackground}" />
+
+            <Grid Height="{StaticResource RowHeight}" Margin="0,0,10,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource IconBoxWidth}" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}" Text="Verzió" />
+                    <TextBlock>
+                        <Hyperlink Style="{StaticResource MaterialDesignCaptionHyperlink}">
+                            2.0.0
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <Grid Height="{StaticResource RowHeight}" Margin="0,0,10,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource IconBoxWidth}" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}" Text="Projekt URL" />
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://github.com/kodaniel/MrSquashWatcher" Style="{StaticResource MaterialDesignCaptionHyperlink}">
+                            https://github.com/kodaniel/MrSquashWatcher
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -47,7 +47,7 @@ public partial class App
 
         // Services
         container.Register<IStartupService, StartupService>();
-        container.Register<IFamulusService, FakeFamulusService>();
+        container.Register<IFamulusService, FamulusService>();
         container.RegisterSingleton<IGamesManager, GamesManager>();
     }
 

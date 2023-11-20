@@ -16,7 +16,7 @@ public class GamesManager : IGamesManager, IDisposable
     private ConcurrentDictionary<Week, ReadOnlyDictionary<CalendarPosition, Game>> _games;
     private ConcurrentDictionary<Week, DateTime> _lastFetchTimes;
 #if DEBUG
-    private TimeSpan RefreshInterval = TimeSpan.FromSeconds(20);
+    private TimeSpan RefreshInterval = TimeSpan.FromSeconds(30);
 #else
     private TimeSpan RefreshInterval = TimeSpan.FromMinutes(2);
 #endif
@@ -36,9 +36,6 @@ public class GamesManager : IGamesManager, IDisposable
 
     public async Task<IEnumerable<Game>> GetOrUpdateGamesOnWeek(Week week, bool forceUpdate = false, CancellationToken cancellationToken = default!)
     {
-        if (_games.ContainsKey(week))
-            Debug.WriteLine($"Week {week.StartDate} already fetched.");
-
         var isOutdated = (_lastFetchTimes.ContainsKey(week) && DateTime.UtcNow - _lastFetchTimes[week] > RefreshInterval);
         if (forceUpdate || !_games.ContainsKey(week) || isOutdated)
         {
@@ -171,6 +168,7 @@ public class GamesManager : IGamesManager, IDisposable
                         Track = trackId,
                         Reserved = appointment.Reserved,
                         Enabled = appointment.Enabled,
+                        Price = appointment.Price,
                         CalendarPosition = new CalendarPosition(row, col)
                     };
 

@@ -10,13 +10,31 @@ public class SettingsViewModel : BindableBase, IDialogAware
     public int WatchWeeks
     {
         get => UserSettings.Instance.NumOfWeeks;
-        set => UserSettings.Instance.NumOfWeeks = value;
+        set
+        {
+            UserSettings.Instance.NumOfWeeks = value;
+            RaisePropertyChanged();
+        }
+    }
+
+    public bool ShowNotifications
+    {
+        get => UserSettings.Instance.ShowNotifications;
+        set
+        {
+            UserSettings.Instance.ShowNotifications = value;
+            RaisePropertyChanged();
+        }
     }
 
     public bool AutoStartupApplication
     {
         get => _startupService.IsRunApplicationOnStartup();
-        set => _startupService.SetApplicationStartup(value);
+        set
+        {
+            _startupService.SetApplicationStartup(value);
+            RaisePropertyChanged();
+        }
     }
 
     public string Title => "Beállítások";
