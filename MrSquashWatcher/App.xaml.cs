@@ -1,74 +1,71 @@
 ﻿using H.NotifyIcon;
-using MrSquashWatcher.Data;
 using MrSquashWatcher.Views;
 using Prism.Ioc;
-using System.Threading;
 using System.Windows;
 
-namespace MrSquashWatcher
+namespace MrSquashWatcher;
+
+public partial class App
 {
-    public partial class App
+    private static Mutex _mutex = null;
+
+    public static TaskbarIcon TaskBarIcon { get; private set; }
+
+    protected override void OnStartup(StartupEventArgs e)
     {
-        private static Mutex _mutex = null;
+        const string appName = "MrSquashWatcher";
+        bool createdNew;
 
-        public static TaskbarIcon TaskBarIcon { get; private set; }
+        _mutex = new Mutex(true, appName, out createdNew);
 
-        protected override void OnStartup(StartupEventArgs e)
+        if (!createdNew)
         {
-            const string appName = "MrSquashWatcher";
-            bool createdNew;
-
-            _mutex = new Mutex(true, appName, out createdNew);
-
-            if (!createdNew)
-            {
-                //app is already running! Exiting the application  
-                Current.Shutdown();
-            }
-
-            UserSettings.Instance.Load();
-
-            base.OnStartup(e);
+            //app is already running! Exiting the application  
+            Current.Shutdown();
         }
 
-        protected override Window CreateShell()
-        {
-            TaskBarIcon = (TaskbarIcon)FindResource("TaskbarIcon");
-            TaskBarIcon.ForceCreate();
-            TaskBarIcon.DataContext = Container.Resolve<TaskbarViewModel>();
+        UserSettings.Instance.Load();
 
-            return null;
-        }
+        base.OnStartup(e);
+    }
 
-        protected override void RegisterTypes(IContainerRegistry container)
-        {
-            // Views and Viewmodels
-            container.Register<TaskbarViewModel>();
-            container.RegisterDialog<Reservation, ReservationViewModel>("reservation");
-            container.RegisterDialog<Settings, SettingsViewModel>("settings");
+    protected override Window CreateShell()
+    {
+        TaskBarIcon = (TaskbarIcon)FindResource("TaskbarIcon");
+        TaskBarIcon.ForceCreate();
+        TaskBarIcon.DataContext = Container.Resolve<TaskbarViewModel>();
 
-            // Services
-            container.Register<IStartupService, StartupService>();
-            container.Register<IFamulusService, FakeFamulusService>();
-            container.RegisterSingleton<IGamesManager, GamesManager>();
-        }
+        return null;
+    }
 
-        protected override void Initialize()
-        {
-            base.Initialize();
+    protected override void RegisterTypes(IContainerRegistry container)
+    {
+        // Views and Viewmodels
+        container.Register<TaskbarViewModel>();
+        container.RegisterDialog<Views.Reservation, ReservationViewModel>("reservation");
+        container.RegisterDialog<Settings, SettingsViewModel>("settings");
 
-            var gamesManager = Container.Resolve<IGamesManager>();
-            gamesManager.Start();
-        }
+        // Services
+        container.Register<IStartupService, StartupService>();
+        container.Register<IFamulusService, FakeFamulusService>();
+        container.RegisterSingleton<IGamesManager, GamesManager>();
+    }
 
-        private void OnApplicationExit(object sender, ExitEventArgs e)
-        {
-            var gamesManager = Container.Resolve<IGamesManager>();
-            gamesManager.Stop();
+    protected override void Initialize()
+    {
+        base.Initialize();
 
-            UserSettings.Instance.Save();
+        var gamesManager = Container.Resolve<IGamesManager>();
+        gamesManager.Start();
+    }
 
-            TaskBarIcon?.Dispose();
-        }
+    private void OnApplicationExit(object sender, ExitEventArgs e)
+    {
+        var gamesManager = Container.Resolve<IGamesManager>();
+        gamesManager.Stop();
+
+        UserSettings.Instance.Save();
+
+        TaskBarIcon?.Dispose();
     }
 }

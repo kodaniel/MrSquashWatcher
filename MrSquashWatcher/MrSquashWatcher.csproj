@@ -21,7 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MrSquash.Application\MrSquash.Application.csproj" />
     <ProjectReference Include="..\MrSquash.Controls\MrSquash.Controls.csproj" />
+    <ProjectReference Include="..\MrSquash.Domain\MrSquash.Domain.csproj" />
+    <ProjectReference Include="..\MrSquash.Infrastructure\MrSquash.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,11 +33,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="user.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>user.settings</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -42,13 +40,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="user.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>user.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 
 </Project>

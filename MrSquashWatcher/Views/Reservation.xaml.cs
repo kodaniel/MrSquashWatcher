@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace MrSquashWatcher;
+namespace MrSquashWatcher.Views;
 
 public partial class Reservation : UserControl
 {

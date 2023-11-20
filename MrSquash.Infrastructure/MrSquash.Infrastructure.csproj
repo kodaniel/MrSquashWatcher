@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MrSquash.Application\MrSquash.Application.csproj" />
+    <ProjectReference Include="..\MrSquash.Domain\MrSquash.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="AppUser.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AppUser.settings</DependentUpon>
+    </Compile>
+    <Compile Update="user.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>user.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AppUser.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>AppUser.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>

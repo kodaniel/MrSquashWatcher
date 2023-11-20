@@ -1,5 +1,4 @@
-﻿using MrSquashWatcher.Data;
-using Prism.Mvvm;
+﻿using Prism.Mvvm;
 using Prism.Services.Dialogs;
 
 namespace MrSquashWatcher.ViewModels;

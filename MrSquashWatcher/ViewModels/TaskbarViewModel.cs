@@ -1,20 +1,15 @@
 ﻿using H.NotifyIcon.Core;
-using ImTools;
 using Microsoft.Toolkit.Uwp.Notifications;
-using MrSquashWatcher.Models;
 using MrSquashWatcher.Properties;
-using MrSquashWatcher.ViewModels;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
 using System.Windows;
 using Windows.Foundation.Collections;
 
-namespace MrSquashWatcher;
+namespace MrSquashWatcher.ViewModels;
 
 public class TaskbarViewModel : BindableBase
 {
