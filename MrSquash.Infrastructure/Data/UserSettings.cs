@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MaterialDesignThemes.Wpf;
+using Newtonsoft.Json;
 
 namespace MrSquash.Infrastructure.Data;
 
@@ -46,6 +47,19 @@ public class UserSettings
         set => AppUser.Default.ShowNotifications = value;
     }
 
+    public AppThemes ApplicationTheme
+    {
+        get => (AppThemes)AppUser.Default.Theme;
+        set
+        {
+            if (ApplicationTheme != value)
+            {
+                AppUser.Default.Theme = (int)value;
+                UpdateApplicationTheme();
+            }
+        }
+    }
+
     public void SetUser(string name, string email, string phone)
     {
         Name = name;
@@ -76,5 +90,22 @@ public class UserSettings
             _selectedGrids.Add(calendarPosition);
         else
             _selectedGrids.Remove(calendarPosition);
+    }
+
+    public void UpdateApplicationTheme()
+    {
+        var paletteHelper = new PaletteHelper();
+
+        IBaseTheme systemTheme = ApplicationTheme switch
+        {
+            AppThemes.Dark => Theme.Dark,
+            AppThemes.Light => Theme.Light,
+            _ => Theme.GetSystemTheme()?.GetBaseTheme() ?? Theme.Light,
+        };
+
+        ITheme theme = paletteHelper.GetTheme();
+        theme.SetBaseTheme(systemTheme);
+
+        paletteHelper.SetTheme(theme);
     }
 }

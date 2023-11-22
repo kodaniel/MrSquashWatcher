@@ -32,6 +32,9 @@ namespace MrSquash.Controls
         public static readonly DependencyProperty SelectedBorderThicknessProperty =
             DependencyProperty.Register(nameof(SelectedBorderThickness), typeof(Thickness), typeof(ReservationControl), new PropertyMetadata(new Thickness(1)));
 
+        public static readonly DependencyProperty SelectedCornerRadiusProperty =
+            DependencyProperty.Register(nameof(SelectedCornerRadius), typeof(CornerRadius), typeof(ReservationControl), new PropertyMetadata(new CornerRadius(0)));
+
         public static readonly DependencyProperty IsActiveProperty =
             DependencyProperty.Register(nameof(IsActive), typeof(bool), typeof(ReservationControl));
 
@@ -108,6 +111,12 @@ namespace MrSquash.Controls
         {
             get => (CornerRadius)GetValue(CornerRadiusProperty);
             set => SetValue(CornerRadiusProperty, value);
+        }
+
+        public CornerRadius SelectedCornerRadius
+        {
+            get => (CornerRadius)GetValue(SelectedCornerRadiusProperty);
+            set => SetValue(SelectedCornerRadiusProperty, value);
         }
 
         static ReservationControl()

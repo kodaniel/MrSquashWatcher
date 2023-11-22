@@ -2,6 +2,6 @@
 
 namespace MrSquash.Application.Events;
 
-public class OpenReservationDialogEvent : PubSubEvent<Game>
+public class OpenReservationDialogEvent : LogPubSubEvent<Game>
 {
 }

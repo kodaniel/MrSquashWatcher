@@ -7,10 +7,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:MrSquashWatcher.Views"
-    xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TaskbarViewModel}}"
     d:DesignHeight="400"
     d:DesignWidth="300"
@@ -91,6 +91,7 @@
                         <Style BasedOn="{StaticResource MaterialDesignTextBlock}" TargetType="{x:Type TextBlock}">
                             <Setter Property="VerticalAlignment" Value="Center" />
                             <Setter Property="Margin" Value="8" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
                         </Style>
                     </Grid.Resources>
                     <Grid.RowDefinitions>
@@ -147,13 +148,14 @@
                                 BorderThickness="0"
                                 Command="{Binding Path=DataContext.ReserveCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                 CommandParameter="{Binding}"
-                                CornerRadius="1"
+                                CornerRadius="3"
                                 IsActive="{Binding Enabled}"
                                 IsReserved="{Binding Reserved}"
                                 IsSelected="{Binding Selected}"
                                 ReservedBackground="{DynamicResource ReservationReservedColor}"
-                                SelectedBorderBrush="#000"
-                                SelectedBorderThickness="3">
+                                SelectedBorderBrush="Black"
+                                SelectedBorderThickness="3"
+                                SelectedCornerRadius="1">
                                 <controls:ReservationControl.ToolTip>
                                     <TextBlock>
                                         <Run Text="{Binding StartTime, StringFormat='HH:mm', Mode=OneWay}" />

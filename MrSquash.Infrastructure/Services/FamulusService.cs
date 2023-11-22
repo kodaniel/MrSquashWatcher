@@ -1,4 +1,5 @@
-﻿using MrSquash.Infrastructure.Dtos;
+﻿using Microsoft.Extensions.Logging;
+using MrSquash.Infrastructure.Dtos;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -7,10 +8,14 @@ namespace MrSquash.Infrastructure.Services;
 public class FamulusService : IFamulusService
 {
     private const int SQUASH_TYPE_ID = 2;
+
+    private readonly ILogger<FamulusService> _logger;
     private HttpClient _client;
 
-    public FamulusService()
+    public FamulusService(ILogger<FamulusService> logger)
     {
+        _logger = logger;
+
         _client = new();
         _client.BaseAddress = new Uri("https://famulushotel.hu/");
         _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
@@ -38,17 +43,18 @@ public class FamulusService : IFamulusService
             var response = await _client.PostAsync(url, content);
 
             if (!response.IsSuccessStatusCode)
-                return false;
+                throw new HttpRequestException("Status code is not 200.");
 
             var body = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(body))
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("Response body is empty.");
 
             var result = ParseReserveResponse(body);
             return string.IsNullOrEmpty(result.Error);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to reserve the game.");
             return false;
         }
     }
@@ -67,16 +73,17 @@ public class FamulusService : IFamulusService
             var response = await _client.PostAsync(url, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException();
+                throw new HttpRequestException("Status code is not 200.");
 
             var body = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(body))
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("Response body is empty.");
 
             return ParseFetchResponse(body);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to fetch the current week.");
             return new List<Day>();
         }
     }
@@ -96,16 +103,17 @@ public class FamulusService : IFamulusService
             var response = await _client.PostAsync(url, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException();
+                throw new HttpRequestException("Status code is not 200.");
 
             var body = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(body))
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("Response body is empty.");
 
             return ParseFetchResponse(body);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to fetch the next week.");
             return new List<Day>();
         }
     }

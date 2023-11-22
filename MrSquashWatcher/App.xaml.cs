@@ -1,8 +1,13 @@
 ﻿using H.NotifyIcon;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.Logging;
+using MrSquashWatcher.Extensions;
 using MrSquashWatcher.Views;
 using Prism.Ioc;
+using Serilog;
 using Squirrel;
 using System.Windows;
+using System.Windows.Media;
 
 namespace MrSquashWatcher;
 
@@ -30,7 +35,14 @@ public partial class App
             onAppUninstall: OnAppUninstall,
             onEveryRun: OnAppRun);
 
+        // Configure Serilog and the sinks at the startup of the app
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.File(path: "MrSquashWatcher.log")
+            .CreateLogger();
+
         UserSettings.Instance.Load();
+        UserSettings.Instance.UpdateApplicationTheme();
 
         base.OnStartup(e);
     }
@@ -44,21 +56,25 @@ public partial class App
         return null;
     }
 
-    protected override void RegisterTypes(IContainerRegistry container)
+    protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
+        containerRegistry.RegisterSerilog(Log.Logger);
+
         // Views and Viewmodels
-        container.Register<TaskbarViewModel>();
-        container.RegisterDialog<Views.Reservation, ReservationViewModel>("reservation");
-        container.RegisterDialog<Settings, SettingsViewModel>("settings");
+        containerRegistry.Register<TaskbarViewModel>();
+        containerRegistry.RegisterDialog<Views.Reservation, ReservationViewModel>("reservation");
+        containerRegistry.RegisterDialog<Settings, SettingsViewModel>("settings");
 
         // Services
-        container.Register<IStartupService, StartupService>();
-        container.Register<IFamulusService, FamulusService>();
-        container.RegisterSingleton<IGamesManager, GamesManager>();
+        containerRegistry.Register<IStartupService, StartupService>();
+        containerRegistry.Register<IFamulusService, FamulusService>();
+        containerRegistry.RegisterSingleton<IGamesManager, GamesManager>();
     }
 
     protected override void Initialize()
     {
+        Log.Information("Initializing application");
+
         base.Initialize();
 
         var gamesManager = Container.Resolve<IGamesManager>();
@@ -67,28 +83,31 @@ public partial class App
 
     private void OnApplicationExit(object sender, ExitEventArgs e)
     {
+        Log.Information("Exiting application");
+
         var gamesManager = Container.Resolve<IGamesManager>();
         gamesManager.Stop();
 
         UserSettings.Instance.Save();
 
         TaskBarIcon?.Dispose();
+
+        // Flush all Serilog sinks before the app closes
+        Log.CloseAndFlush();
     }
 
     private static void OnAppInstall(SemanticVersion version, IAppTools tools)
     {
-        tools.CreateShortcutForThisExe(ShortcutLocation.StartMenu | ShortcutLocation.Desktop);
+        tools.CreateShortcutForThisExe(ShortcutLocation.StartMenu);
     }
 
     private static void OnAppUninstall(SemanticVersion version, IAppTools tools)
     {
-        tools.RemoveShortcutForThisExe(ShortcutLocation.StartMenu | ShortcutLocation.Desktop);
+        tools.RemoveShortcutForThisExe(ShortcutLocation.StartMenu);
     }
 
     private static void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
     {
         tools.SetProcessAppUserModelId();
-        // show a welcome message when the app is first installed
-        if (firstRun) MessageBox.Show("Thanks for installing my application!");
     }
 }

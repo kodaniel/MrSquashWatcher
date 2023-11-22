@@ -1,4 +1,5 @@
 ﻿using H.NotifyIcon.Core;
+using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using MrSquashWatcher.Properties;
 using Prism.Commands;
@@ -18,6 +19,7 @@ public class TaskbarViewModel : BindableBase
     private readonly IGamesManager _gamesManager;
     private readonly IStartupService _startupService;
     private readonly IDialogService _dialogService;
+    private readonly ILogger<TaskbarViewModel> _logger;
 
     private bool _isLoadingCalendar;
     private Week _currentWeek = Week.Now;
@@ -64,12 +66,14 @@ public class TaskbarViewModel : BindableBase
     public DelegateCommand OpenPopupCommand { get; init; }
     public DelegateCommand<GameViewModel> ReserveCommand { get; init; }
 
-    public TaskbarViewModel(IEventAggregator eventAggregator, IGamesManager gamesManager, IStartupService startupService, IDialogService dialogService)
+    public TaskbarViewModel(
+        IEventAggregator eventAggregator, IGamesManager gamesManager, IStartupService startupService, IDialogService dialogService, ILogger<TaskbarViewModel> logger)
     {
         _eventAggregator = eventAggregator;
         _gamesManager = gamesManager;
         _startupService = startupService;
         _dialogService = dialogService;
+        _logger = logger;
 
         _eventAggregator.GetEvent<GameUpdatedEvent>().Subscribe(OnGamesUpdated, ThreadOption.UIThread);
         _eventAggregator.GetEvent<OpenReservationDialogEvent>().Subscribe(OnOpenReservationWindow, ThreadOption.UIThread);
@@ -265,6 +269,7 @@ public class TaskbarViewModel : BindableBase
         if (!UserSettings.Instance.ShowNotifications)
             return;
 
+        _logger.LogError("An error occured during downloading the games: {message}", message);
         App.TaskBarIcon.ShowNotification("Hiba", message, NotificationIcon.Error);
     }
 

@@ -21,12 +21,12 @@
                             x:Name="PART_ActiveBorder"
                             Margin="{TemplateBinding Padding}"
                             Background="Transparent"
-                            CornerRadius="{TemplateBinding CornerRadius}"
                             SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                     </Grid>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="PART_ActiveBorder" Property="CornerRadius" Value="{Binding Path=SelectedCornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Setter TargetName="PART_ActiveBorder" Property="BorderThickness" Value="{Binding Path=SelectedBorderThickness, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Setter TargetName="PART_ActiveBorder" Property="BorderBrush" Value="{Binding Path=SelectedBorderBrush, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Trigger>

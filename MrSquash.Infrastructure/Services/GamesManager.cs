@@ -1,4 +1,5 @@
-﻿using MrSquash.Infrastructure.Data;
+﻿using Microsoft.Extensions.Logging;
+using MrSquash.Infrastructure.Data;
 using Prism.Events;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ public class GamesManager : IGamesManager, IDisposable
 {
     private readonly IEventAggregator _eventAggregator;
     private readonly IFamulusService _famulusService;
+    private readonly ILogger<GamesManager> _logger;
     private readonly BackgroundWorker _worker;
 
     private ConcurrentDictionary<Week, ReadOnlyDictionary<CalendarPosition, Game>> _games;
@@ -22,10 +24,11 @@ public class GamesManager : IGamesManager, IDisposable
 #endif
     private CancellationTokenSource _cts = null!;
 
-    public GamesManager(IEventAggregator eventAggregator, IFamulusService famulusService)
+    public GamesManager(IEventAggregator eventAggregator, IFamulusService famulusService, ILogger<GamesManager> logger)
     {
         _eventAggregator = eventAggregator;
         _famulusService = famulusService;
+        _logger = logger;
 
         _games = new ConcurrentDictionary<Week, ReadOnlyDictionary<CalendarPosition, Game>>();
         _lastFetchTimes = new ConcurrentDictionary<Week, DateTime>();

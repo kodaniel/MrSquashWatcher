@@ -1,4 +1,5 @@
-﻿using Prism.Commands;
+﻿using Microsoft.Extensions.Logging;
+using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System.Globalization;
@@ -15,6 +16,7 @@ public enum ReservationResults
 public class ReservationViewModel : BindableBase, IDialogAware
 {
     private readonly IFamulusService _famulusService;
+    private readonly ILogger<ReservationViewModel> _logger;
 
     private Game _game;
     private bool _isSubmitting;
@@ -88,9 +90,10 @@ public class ReservationViewModel : BindableBase, IDialogAware
 
     public DelegateCommand CloseCommand { get; init; }
 
-    public ReservationViewModel(IFamulusService famulusService)
+    public ReservationViewModel(IFamulusService famulusService, ILogger<ReservationViewModel> logger)
     {
         _famulusService = famulusService;
+        _logger = logger;
 
         ReserveCommand = new DelegateCommand(OnReserve, CanReserve);
         CloseCommand = new DelegateCommand(() => RequestClose(new DialogResult(ButtonResult.Cancel)));
@@ -113,6 +116,7 @@ public class ReservationViewModel : BindableBase, IDialogAware
             Price = _game.Price
         }) ? ReservationResults.Succeeded : ReservationResults.Failed;
 
+        _logger.LogDebug("Reserve game '{Appointment}': {ReservationResult}", Appointment, ReservationResult);
         await Task.Delay(2000);
 
         IsSubmitting = false;

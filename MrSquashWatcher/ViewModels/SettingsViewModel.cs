@@ -38,6 +38,16 @@ public class SettingsViewModel : BindableBase, IDialogAware
         }
     }
 
+    public AppThemes SelectedTheme
+    {
+        get => UserSettings.Instance.ApplicationTheme;
+        set
+        {
+            UserSettings.Instance.ApplicationTheme = value;
+            RaisePropertyChanged();
+        }
+    }
+
     public string ApplicationVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
     public string Title => "Beállítások";
