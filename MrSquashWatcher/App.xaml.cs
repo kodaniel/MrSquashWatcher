@@ -42,7 +42,6 @@ public partial class App
             .CreateLogger();
 
         UserSettings.Instance.Load();
-        UserSettings.Instance.UpdateApplicationTheme();
 
         base.OnStartup(e);
     }

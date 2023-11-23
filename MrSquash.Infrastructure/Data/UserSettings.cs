@@ -52,11 +52,13 @@ public class UserSettings
         get => (AppThemes)AppUser.Default.Theme;
         set
         {
-            if (ApplicationTheme != value)
-            {
-                AppUser.Default.Theme = (int)value;
-                UpdateApplicationTheme();
-            }
+            var oldValue = (AppThemes)AppUser.Default.Theme;
+            if (oldValue == value)
+                return;
+
+            AppUser.Default.Theme = (int)value;
+
+            UpdateTheme();
         }
     }
 
@@ -70,6 +72,8 @@ public class UserSettings
     public void Load()
     {
         _selectedGrids = JsonConvert.DeserializeObject<HashSet<CalendarPosition>>(AppUser.Default.SelectedGames) ?? new();
+
+        UpdateTheme();
     }
 
     public void Save()
@@ -92,11 +96,11 @@ public class UserSettings
             _selectedGrids.Remove(calendarPosition);
     }
 
-    public void UpdateApplicationTheme()
+    private void UpdateTheme()
     {
         var paletteHelper = new PaletteHelper();
 
-        IBaseTheme systemTheme = ApplicationTheme switch
+        IBaseTheme baseTheme = ApplicationTheme switch
         {
             AppThemes.Dark => Theme.Dark,
             AppThemes.Light => Theme.Light,
@@ -104,7 +108,7 @@ public class UserSettings
         };
 
         ITheme theme = paletteHelper.GetTheme();
-        theme.SetBaseTheme(systemTheme);
+        theme.SetBaseTheme(baseTheme);
 
         paletteHelper.SetTheme(theme);
     }
