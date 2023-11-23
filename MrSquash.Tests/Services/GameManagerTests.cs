@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using MrSquash.Infrastructure.Services;
 using MrSquash.Tests.Services.Mocks;
 using Prism.Events;
@@ -11,9 +12,11 @@ public class GameManagerTests
     [SetUp]
     public void Setup()
     {
+        var logger = new Logger<GamesManager>(LoggerFactory.Create(options => { }));
         var eventAggregator = new EventAggregator();
         var famulusService = new FamulusServiceMock();
-        _gamesManager = new GamesManager(eventAggregator, famulusService);
+
+        _gamesManager = new GamesManager(eventAggregator, famulusService, logger);
     }
 
     [Test]
