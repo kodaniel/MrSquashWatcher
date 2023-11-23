@@ -4,7 +4,6 @@ using Prism.Events;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace MrSquash.Infrastructure.Services;
 

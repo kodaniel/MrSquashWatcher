@@ -1,13 +1,10 @@
 ﻿using H.NotifyIcon;
-using MaterialDesignThemes.Wpf;
-using Microsoft.Extensions.Logging;
 using MrSquashWatcher.Extensions;
 using MrSquashWatcher.Views;
 using Prism.Ioc;
 using Serilog;
 using Squirrel;
 using System.Windows;
-using System.Windows.Media;
 
 namespace MrSquashWatcher;
 

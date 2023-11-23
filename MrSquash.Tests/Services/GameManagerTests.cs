@@ -19,6 +19,12 @@ public class GameManagerTests
         _gamesManager = new GamesManager(eventAggregator, famulusService, logger);
     }
 
+    [TearDown]
+    public void TearDown()
+    {
+        _gamesManager.Dispose();
+    }
+
     [Test]
     public void Test_GetGamesOnWeek_NoCachedGames()
     {
