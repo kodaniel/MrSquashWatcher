@@ -1,8 +1,10 @@
-# Mr Squash Watcher
-Famulus squash idıpontok foglalts·g·t figyelı alkalmaz·s.
-Ha egy p·lya felszabadul a be·llÌtott idıpontokban, k¸ld egy Windows ÈrtesÌtÈst.
+[![build](https://github.com/kodaniel/MrSquashWatcher/actions/workflows/dotnet.yml/badge.svg?branch=master)](https://github.com/kodaniel/MrSquashWatcher/actions/workflows/dotnet.yml)
 
-LetˆltÈs [innen](https://github.com/kodaniel/MrSquashWatcher/releases).
+# Mr Squash Watcher
+Famulus squash id√µpontok foglalts√°g√°t figyel√µ alkalmaz√°s.
+Ha egy p√°lya felszabadul a be√°ll√≠tott id√µpontokban, k√ºld egy Windows √©rtes√≠t√©st.
+
+Let√∂lt√©s [innen](https://github.com/kodaniel/MrSquashWatcher/releases).
 
 ![Alt text](web/images/famulus-page.png "Famulus Hotel Squash page")
 
