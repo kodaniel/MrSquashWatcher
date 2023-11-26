@@ -96,6 +96,8 @@ public class UserSettings
             _selectedGrids.Remove(calendarPosition);
     }
 
+    public IEnumerable<CalendarPosition> GetAllSelected() => _selectedGrids.ToList();
+
     private void UpdateTheme()
     {
         var paletteHelper = new PaletteHelper();

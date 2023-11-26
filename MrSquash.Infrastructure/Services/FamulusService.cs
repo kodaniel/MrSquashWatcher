@@ -121,12 +121,15 @@ public class FamulusService : IFamulusService
     private IEnumerable<Day> ParseFetchResponse(string jsonText)
     {
         JObject jReservations = JObject.Parse(jsonText);
-        IList<JToken> jItems = jReservations["items"].Children().ToList();
+        IList<JToken> jItems = jReservations["items"]?.Children().ToList() ?? new List<JToken>();
 
         IList<Day> dayResults = new List<Day>();
         foreach (JToken result in jItems)
         {
-            Day day = result.ToObject<Day>();
+            Day? day = result.ToObject<Day>();
+            if (day == null)
+                continue;
+
             dayResults.Add(day);
         }
 

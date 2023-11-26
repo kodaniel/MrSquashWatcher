@@ -9,7 +9,7 @@ internal class MyDateConverter : JsonConverter<DateTime>
     public override DateTime ReadJson(JsonReader reader, Type objectType, [AllowNull] DateTime existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         JObject jObject = JObject.Load(reader);
-        string isoDate = jObject.Value<string>("iso");
+        string isoDate = jObject.Value<string>("iso")!;
 
         return DateTime.Parse(isoDate);
     }

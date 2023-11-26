@@ -1,6 +1,5 @@
 ﻿using Prism.Mvvm;
 using Prism.Services.Dialogs;
-using System.Reflection;
 
 namespace MrSquashWatcher.ViewModels;
 
@@ -48,7 +47,7 @@ public class SettingsViewModel : BindableBase, IDialogAware
         }
     }
 
-    public string ApplicationVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+    public string ApplicationVersion => App.Version.ToString(); //Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
     public string Title => "Beállítások";
 

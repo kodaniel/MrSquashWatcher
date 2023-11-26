@@ -11,6 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="clr-namespace:MrSquashWatcher.ViewModels"
+    MinWidth="300"
     d:DataContext="{d:DesignInstance Type={x:Type vm:TaskbarViewModel}}"
     d:DesignHeight="400"
     d:DesignWidth="300"

@@ -17,7 +17,7 @@ internal class TimeOnlyConverter : JsonConverter<TimeOnly>
 
     public override TimeOnly ReadJson(JsonReader reader, Type objectType, TimeOnly existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
-        var value = (string)reader.Value;
+        var value = (string)reader.Value!;
         return TimeOnly.Parse(value!);
     }
 

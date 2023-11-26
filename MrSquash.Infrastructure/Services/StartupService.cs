@@ -6,11 +6,11 @@ namespace MrSquash.Infrastructure.Services;
 public class StartupService : IStartupService
 {
     private const string APP_KEY = "MrSquashWatcher";
-    public static string ExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
+    public static string ExecutablePath = Process.GetCurrentProcess().MainModule!.FileName;
 
     public void AddApplicationToStartup()
     {
-        using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+        using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!)
         {
             regkey.SetValue(APP_KEY, ExecutablePath);
         }
@@ -18,7 +18,7 @@ public class StartupService : IStartupService
 
     public void RemoveApplicationFromStartup()
     {
-        using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+        using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!)
         {
             regkey.DeleteValue(APP_KEY, false);
         }
@@ -34,7 +34,7 @@ public class StartupService : IStartupService
 
     public bool IsRunApplicationOnStartup()
     {
-        using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+        using (var regkey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)!)
         {
             if (regkey.GetValue(APP_KEY) is null)
                 return false;

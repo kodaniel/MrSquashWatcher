@@ -77,7 +77,7 @@ public class GamesManager : IGamesManager, IDisposable
         _cts?.Cancel();
     }
 
-    private void DoWork(object sender, DoWorkEventArgs e)
+    private void DoWork(object? sender, DoWorkEventArgs e)
     {
         while (!_cts.IsCancellationRequested)
         {
