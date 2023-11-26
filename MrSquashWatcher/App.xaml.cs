@@ -14,6 +14,8 @@ public partial class App
 
     public static TaskbarIcon TaskBarIcon { get; private set; }
 
+    public static SemanticVersion Version { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         const string appName = "MrSquashWatcher";
@@ -65,14 +67,19 @@ public partial class App
         containerRegistry.Register<IStartupService, StartupService>();
         containerRegistry.Register<IFamulusService, FamulusService>();
         containerRegistry.RegisterSingleton<IGamesManager, GamesManager>();
+        containerRegistry.Register<IUpdateService, UpdateService>();
     }
 
-    protected override void Initialize()
+    protected override async void Initialize()
     {
         Log.Information("Initializing application");
-
         base.Initialize();
 
+        Log.Information("Checking for updates");
+        var updater = Container.Resolve<IUpdateService>();
+        await updater.UpdateApp();
+
+        Log.Information("Start watching");
         var gamesManager = Container.Resolve<IGamesManager>();
         gamesManager.Start();
     }
@@ -104,6 +111,8 @@ public partial class App
 
     private static void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
     {
+        Version = version;
+
         tools.SetProcessAppUserModelId();
     }
 }

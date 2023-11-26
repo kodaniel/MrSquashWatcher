@@ -1,0 +1,55 @@
+name: release
+
+on:
+  release:
+    types: [created]
+
+env:
+  Solution_Name: MrSquashWatcher.sln
+  Test_Project_Path: MrSquash.Tests\MrSquash.Tests.csproj
+  DOTNET_VERSION: '8.0.x' # The .NET SDK version to use
+  
+jobs:
+  build:
+
+    name: build-${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --no-build --configuration Release
+
+    - name: Publish
+      run: dotnet publish --no-build --configuration Release --self-contained true -p:Version=${{ github.ref_name }}
+    
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: Installer
+        path: ./Releases
+    
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        fail_on_unmatched_files: true
+        generate_release_notes: true
+        files: |
+          ./Releases/RELEASES
+          ./Releases/MrSquashWatcher-${{ github.ref_name }}-full.nupkg
+          ./Releases/MrSquashWatcherSetup.exe
