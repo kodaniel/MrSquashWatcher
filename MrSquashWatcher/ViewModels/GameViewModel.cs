@@ -2,9 +2,10 @@
 
 namespace MrSquashWatcher.ViewModels;
 
-public class GameViewModel : BindableBase
+public class GameViewModel(Game game, IUserSettings userSettings) : BindableBase
 {
-    private readonly Game _game;
+    private readonly Game _game = game ?? throw new ArgumentNullException(nameof(game));
+    private readonly IUserSettings _userSettings = userSettings ?? throw new ArgumentNullException(nameof(userSettings));
 
     public int Row => _game.CalendarPosition.Row;
 
@@ -24,15 +25,13 @@ public class GameViewModel : BindableBase
 
     public bool Selected
     {
-        get => UserSettings.Instance.IsSelected(_game.CalendarPosition);
+        get => _userSettings.IsSelected(_game.CalendarPosition);
         set
         {
-            UserSettings.Instance.SetSelected(_game.CalendarPosition, value);
+            _userSettings.SetSelected(_game.CalendarPosition, value);
             RaisePropertyChanged();
         }
     }
-
-    public GameViewModel(Game game) => _game = game;
 
     public Game GetModel() => _game;
 }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace MrSquash.Infrastructure.Data;
+namespace MrSquash.Application;
 
 public enum AppThemes
 {

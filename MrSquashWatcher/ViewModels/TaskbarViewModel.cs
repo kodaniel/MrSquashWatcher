@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using MrSquashWatcher.Properties;
+using MrSquashWatcher.Toasts;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -18,6 +19,7 @@ public class TaskbarViewModel : BindableBase
     private readonly IEventAggregator _eventAggregator;
     private readonly IGamesManager _gamesManager;
     private readonly IStartupService _startupService;
+    private readonly IUserSettings _userSettings;
     private readonly IDialogService _dialogService;
     private readonly ILogger<TaskbarViewModel> _logger;
 
@@ -67,11 +69,13 @@ public class TaskbarViewModel : BindableBase
     public DelegateCommand<GameViewModel> ReserveCommand { get; init; }
 
     public TaskbarViewModel(
-        IEventAggregator eventAggregator, IGamesManager gamesManager, IStartupService startupService, IDialogService dialogService, ILogger<TaskbarViewModel> logger)
+        IEventAggregator eventAggregator, IGamesManager gamesManager, IStartupService startupService, 
+        IUserSettings userSettings, IDialogService dialogService, ILogger<TaskbarViewModel> logger)
     {
         _eventAggregator = eventAggregator;
         _gamesManager = gamesManager;
         _startupService = startupService;
+        _userSettings = userSettings;
         _dialogService = dialogService;
         _logger = logger;
 
@@ -134,7 +138,7 @@ public class TaskbarViewModel : BindableBase
     }
 
     private IEnumerable<GameViewModel> GamesToViewModel(IEnumerable<Game> games) =>
-        games.Select(g => new GameViewModel(g));
+        games.Select(g => new GameViewModel(g, _userSettings));
 
     #region Command handlers
 
@@ -222,51 +226,22 @@ public class TaskbarViewModel : BindableBase
 
         App.TaskBarIcon.Icon = Resources.trayicon_active;
 
-        if (!UserSettings.Instance.ShowNotifications)
+        if (!_userSettings.ShowNotifications)
             return;
 
-        var generateGameTitle = (Game g) => $"{g.Date:yyyy.MM.dd} {g.StartTime:HH} óra, {g.Track + 1}. pálya";
-
-        var toastBuilder = new ToastContentBuilder()
-            .AddButton(new ToastButton()
-                .SetContent("Mégse")
-                .SetDismissActivation())
-            .AddButton(new ToastButton()
-                .SetContent("Foglalás")
-                .AddArgument("action", "reserve")
-                .SetBackgroundActivation())
-            .SetToastScenario(ToastScenario.Reminder);
-
-        if (games.Count == 1)
+        var toastFactory = new GameFreedToastFactory((Game g) => $"{g.Date:yyyy.MM.dd} {g.StartTime:HH} óra, {g.Track + 1}. pálya");
+        var toast = toastFactory.Create(games);
+        
+        toast.Show(t =>
         {
-            toastBuilder
-                .AddArgument("toastId", "game-freed")
-                .AddText("Egy pálya felszabadult")
-                .AddText(generateGameTitle(games[0]))
-                .AddArgument("game", JsonConvert.SerializeObject(games[0]));
-        }
-        else
-        {
-            var choices = games.Take(5).Select((g, i) => (i.ToString(), generateGameTitle(g))).ToList();
-            for (int i = 0; i < choices.Count; i++)
-                toastBuilder.AddArgument(i.ToString(), JsonConvert.SerializeObject(games[i]));
-
-            toastBuilder
-                .AddArgument("toastId", "games-freed")
-                .AddText($"{games.Count} pálya felszabadult")
-                .AddComboBox("selected", "Válassz pályát", "0", choices);
-        }
-
-        toastBuilder.Show(toast =>
-        {
-            toast.ExpirationTime = DateTime.Now.AddDays(1);
-            toast.Group = "freedGame";
+            t.ExpirationTime = DateTime.Now.AddDays(1);
+            t.Group = "freedGame";
         });
     }
 
     private void ShowError(string message)
     {
-        if (!UserSettings.Instance.ShowNotifications)
+        if (!_userSettings.ShowNotifications)
             return;
 
         _logger.LogError("An error occured during downloading the games: {message}", message);

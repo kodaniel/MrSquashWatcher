@@ -1,19 +1,13 @@
 ﻿using MaterialDesignThemes.Wpf;
+using MrSquash.Application;
 using Newtonsoft.Json;
 
 namespace MrSquash.Infrastructure.Data;
 
-public class UserSettings
+public class UserSettings : IUserSettings
 {
     public const double MIN_WATCH_WEEKS = 1;
     public const double MAX_WATCH_WEEKS = 4;
-
-    private static Lazy<UserSettings> _instance = new Lazy<UserSettings>(() => new UserSettings());
-    public static UserSettings Instance => _instance.Value;
-
-    private UserSettings()
-    {
-    }
 
     private HashSet<CalendarPosition> _selectedGrids = new();
 

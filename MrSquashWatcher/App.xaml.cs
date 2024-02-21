@@ -10,7 +10,7 @@ namespace MrSquashWatcher;
 
 public partial class App
 {
-    private static Mutex _mutex = null;
+    private static Mutex _mutex;
 
     public static TaskbarIcon TaskBarIcon { get; private set; }
 
@@ -40,9 +40,10 @@ public partial class App
             .WriteTo.File(path: "MrSquashWatcher.log")
             .CreateLogger();
 
-        UserSettings.Instance.Load();
-
         base.OnStartup(e);
+
+        var userSettings = Container.Resolve<IUserSettings>();
+        userSettings.Load();
     }
 
     protected override Window CreateShell()
@@ -64,6 +65,7 @@ public partial class App
         containerRegistry.RegisterDialog<Settings, SettingsViewModel>("settings");
 
         // Services
+        containerRegistry.RegisterSingleton<IUserSettings, UserSettings>();
         containerRegistry.Register<IStartupService, StartupService>();
         containerRegistry.Register<IFamulusService, FamulusService>();
         containerRegistry.RegisterSingleton<IGamesManager, GamesManager>();
@@ -91,7 +93,8 @@ public partial class App
         var gamesManager = Container.Resolve<IGamesManager>();
         gamesManager.Stop();
 
-        UserSettings.Instance.Save();
+        var userSettings = Container.Resolve<IUserSettings>();
+        userSettings.Save();
 
         TaskBarIcon?.Dispose();
 
@@ -111,7 +114,7 @@ public partial class App
 
     private static void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
     {
-        Version = version;
+        Version = version ?? new SemanticVersion("0.0.0");
 
         tools.SetProcessAppUserModelId();
     }

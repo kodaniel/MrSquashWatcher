@@ -1,4 +1,5 @@
-﻿using Prism.Mvvm;
+﻿using MrSquash.Application;
+using Prism.Mvvm;
 using Prism.Services.Dialogs;
 
 namespace MrSquashWatcher.ViewModels;
@@ -6,23 +7,24 @@ namespace MrSquashWatcher.ViewModels;
 public class SettingsViewModel : BindableBase, IDialogAware
 {
     private readonly IStartupService _startupService;
+    private readonly IUserSettings _userSettings;
 
     public int WatchWeeks
     {
-        get => UserSettings.Instance.NumOfWeeks;
+        get => _userSettings.NumOfWeeks;
         set
         {
-            UserSettings.Instance.NumOfWeeks = value;
+            _userSettings.NumOfWeeks = value;
             RaisePropertyChanged();
         }
     }
 
     public bool ShowNotifications
     {
-        get => UserSettings.Instance.ShowNotifications;
+        get => _userSettings.ShowNotifications;
         set
         {
-            UserSettings.Instance.ShowNotifications = value;
+            _userSettings.ShowNotifications = value;
             RaisePropertyChanged();
         }
     }
@@ -39,10 +41,10 @@ public class SettingsViewModel : BindableBase, IDialogAware
 
     public AppThemes SelectedTheme
     {
-        get => UserSettings.Instance.ApplicationTheme;
+        get => _userSettings.ApplicationTheme;
         set
         {
-            UserSettings.Instance.ApplicationTheme = value;
+            _userSettings.ApplicationTheme = value;
             RaisePropertyChanged();
         }
     }
@@ -53,9 +55,10 @@ public class SettingsViewModel : BindableBase, IDialogAware
 
     public event Action<IDialogResult> RequestClose;
 
-    public SettingsViewModel(IStartupService startupService)
+    public SettingsViewModel(IStartupService startupService, IUserSettings userSettings)
     {
         _startupService = startupService;
+        _userSettings = userSettings;
     }
 
     public bool CanCloseDialog() => true;

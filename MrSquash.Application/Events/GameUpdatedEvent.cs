@@ -2,11 +2,11 @@
 
 namespace MrSquash.Application.Events;
 
-public sealed class GameUpdatedEvent : LogPubSubEvent<GameUpdatedEventArgs>
+public class GameUpdatedEvent : PubSubEvent<GameUpdatedEventArgs>
 {
 }
 
-public sealed class GameUpdatedEventArgs : EventArgs
+public class GameUpdatedEventArgs : EventArgs
 {
     public string? ErrorMessage { get; }
     public bool Success { get; }

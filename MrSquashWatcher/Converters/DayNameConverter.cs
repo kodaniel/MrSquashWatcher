@@ -11,7 +11,7 @@ public class DayNameConverter : IValueConverter
 
         culture = new CultureInfo("hu-HU");
         var info = culture.DateTimeFormat;
-        return info.DayNames[(int)d.DayOfWeek].ToUpper()[0];
+        return char.ToString(info.DayNames[(int)d.DayOfWeek].ToUpper()[0]);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

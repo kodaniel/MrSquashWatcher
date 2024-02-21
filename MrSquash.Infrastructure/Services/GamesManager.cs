@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using MrSquash.Infrastructure.Data;
 using Prism.Events;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
@@ -10,6 +9,7 @@ namespace MrSquash.Infrastructure.Services;
 public class GamesManager : IGamesManager, IDisposable
 {
     private readonly IEventAggregator _eventAggregator;
+    private readonly IUserSettings _userSettings;
     private readonly IFamulusService _famulusService;
     private readonly ILogger<GamesManager> _logger;
     private readonly BackgroundWorker _worker;
@@ -23,9 +23,10 @@ public class GamesManager : IGamesManager, IDisposable
 #endif
     private CancellationTokenSource _cts = null!;
 
-    public GamesManager(IEventAggregator eventAggregator, IFamulusService famulusService, ILogger<GamesManager> logger)
+    public GamesManager(IEventAggregator eventAggregator, IUserSettings userSettings, IFamulusService famulusService, ILogger<GamesManager> logger)
     {
         _eventAggregator = eventAggregator;
+        _userSettings = userSettings;
         _famulusService = famulusService;
         _logger = logger;
 
@@ -42,14 +43,14 @@ public class GamesManager : IGamesManager, IDisposable
         if (forceUpdate || !_games.ContainsKey(week) || isOutdated)
         {
             var games = await FetchGamesOnWeek(week, cancellationToken);
-            
+
             if (cancellationToken.IsCancellationRequested)
                 return new List<Game>();
 
             var newGames = ConvertGamesToCalendar(games);
             _lastFetchTimes[week] = DateTime.UtcNow;
 
-            if (_games.ContainsKey(week) && week < Week.Now.AddWeeks(UserSettings.Instance.NumOfWeeks))
+            if (_games.ContainsKey(week) && week < Week.Now.AddWeeks(_userSettings.NumOfWeeks))
             {
                 var freedGames = CheckFreedGames(_games[week], newGames);
                 _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(freedGames));
@@ -77,26 +78,26 @@ public class GamesManager : IGamesManager, IDisposable
         _cts?.Cancel();
     }
 
-    private void DoWork(object? sender, DoWorkEventArgs e)
+    private async void DoWork(object? sender, DoWorkEventArgs e)
     {
         while (!_cts.IsCancellationRequested)
         {
-            UpdateWeeks();
-            Thread.Sleep(RefreshInterval);
+            await UpdateWeeks(_cts.Token);
+            await Task.Delay(RefreshInterval);
         }
     }
 
-    private async void UpdateWeeks()
+    internal async Task UpdateWeeks(CancellationToken cancellationToken = default)
     {
         List<Game> allFreedGames = new();
         var currentWeek = Week.Now;
 
-        for (int i = 0; i < UserSettings.Instance.NumOfWeeks; i++)
+        for (int i = 0; i < _userSettings.NumOfWeeks; i++)
         {
             var oldGames = _games.GetValueOrDefault(currentWeek, new Dictionary<CalendarPosition, Game>().ToReadOnlyDictionary());
-            var games = await FetchGamesOnWeek(currentWeek, _cts.Token);
+            var games = await FetchGamesOnWeek(currentWeek, cancellationToken);
 
-            if (_cts.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
                 return;
 
             _lastFetchTimes[currentWeek] = DateTime.UtcNow;
@@ -116,9 +117,6 @@ public class GamesManager : IGamesManager, IDisposable
             currentWeek++;
         }
 
-        if (_cts.IsCancellationRequested)
-            return;
-
         _eventAggregator.GetEvent<GameUpdatedEvent>().Publish(new GameUpdatedEventArgs(allFreedGames));
     }
 
@@ -129,7 +127,7 @@ public class GamesManager : IGamesManager, IDisposable
             var oldGame = oldGamePair.Value;
             var newGame = newGames[oldGamePair.Key];
 
-            if (!UserSettings.Instance.IsSelected(oldGamePair.Key))
+            if (!_userSettings.IsSelected(oldGamePair.Key))
                 continue;
 
             if (oldGame.Reserved && !newGame.Reserved && newGame.Enabled)

@@ -2,6 +2,7 @@
     x:Class="MrSquashWatcher.Views.Settings"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:application="clr-namespace:MrSquash.Application;assembly=MrSquash.Application"
     xmlns:converters="clr-namespace:MrSquashWatcher.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:data="clr-namespace:MrSquash.Infrastructure.Data;assembly=MrSquash.Infrastructure"
@@ -135,7 +136,7 @@
             <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}" Text="Téma" />
             <ComboBox
                 DisplayMemberPath="DisplayName"
-                ItemsSource="{converters:EnumToItemsSource {x:Type data:AppThemes}}"
+                ItemsSource="{converters:EnumToItemsSource {x:Type application:AppThemes}}"
                 SelectedValue="{Binding SelectedTheme}"
                 SelectedValuePath="Value"
                 Style="{StaticResource MaterialDesignComboBox}" />

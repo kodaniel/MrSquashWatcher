@@ -1,5 +1,9 @@
 ﻿namespace MrSquash.Infrastructure.Services;
 
+/// <summary>
+/// This is a fake implementation of <see cref="IFamulusService"/> which emulates the original 
+/// API endpoints with random data. Use only for testing purposes.
+/// </summary>
 public class FakeFamulusService : IFamulusService
 {
     private int EmulateServiceResponseTime => new Random().Next(1000, 3000);

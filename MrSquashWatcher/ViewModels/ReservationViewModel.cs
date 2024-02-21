@@ -16,9 +16,10 @@ public enum ReservationResults
 public class ReservationViewModel : BindableBase, IDialogAware
 {
     private readonly IFamulusService _famulusService;
+    private readonly IUserSettings _userSettings;
     private readonly ILogger<ReservationViewModel> _logger;
 
-    private Game _game;
+    private Game _game = new Game();
     private bool _isSubmitting;
     private ReservationResults _reservationResult = ReservationResults.None;
     private string _name;
@@ -90,9 +91,10 @@ public class ReservationViewModel : BindableBase, IDialogAware
 
     public DelegateCommand CloseCommand { get; init; }
 
-    public ReservationViewModel(IFamulusService famulusService, ILogger<ReservationViewModel> logger)
+    public ReservationViewModel(IFamulusService famulusService, IUserSettings userSettings, ILogger<ReservationViewModel> logger)
     {
         _famulusService = famulusService;
+        _userSettings = userSettings;
         _logger = logger;
 
         ReserveCommand = new DelegateCommand(OnReserve, CanReserve);
@@ -143,15 +145,15 @@ public class ReservationViewModel : BindableBase, IDialogAware
     {
         _game = parameters.GetValue<Game>("game") ?? throw new ArgumentNullException("game");
 
-        Name = UserSettings.Instance.Name;
-        Email = UserSettings.Instance.Email;
-        Phone = UserSettings.Instance.Phone;
+        Name = _userSettings.Name;
+        Email = _userSettings.Email;
+        Phone = _userSettings.Phone;
     }
 
     public bool CanCloseDialog() => true;
 
     public void OnDialogClosed()
     {
-        UserSettings.Instance.SetUser(Name, Email, Phone);
+        _userSettings.SetUser(Name, Email, Phone);
     }
 }

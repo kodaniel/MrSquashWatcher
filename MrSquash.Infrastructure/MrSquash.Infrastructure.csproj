@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="MrSquash.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
     <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />

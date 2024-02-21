@@ -2,7 +2,8 @@
 
 internal class FamulusServiceMock : IFamulusService
 {
-    private readonly int _emulateServiceResponseTime = 0;
+    private int _emulateServiceResponseTime = 0;
+    private Dictionary<Week, IEnumerable<Day>> _weeks = new();
 
     public FamulusServiceMock()
     {
@@ -33,7 +34,7 @@ internal class FamulusServiceMock : IFamulusService
         {
             await Task.Delay(_emulateServiceResponseTime, cancellationToken);
 
-            return PopulateWeek(Week.Now);
+            return GetWeekOrPopulate(Week.Now);
         }
         catch (TaskCanceledException)
         {
@@ -47,7 +48,7 @@ internal class FamulusServiceMock : IFamulusService
         {
             await Task.Delay(_emulateServiceResponseTime, cancellationToken);
 
-            return PopulateWeek(week + 1);
+            return GetWeekOrPopulate(week + 1);
         }
         catch (TaskCanceledException)
         {
@@ -55,8 +56,18 @@ internal class FamulusServiceMock : IFamulusService
         }
     }
 
-    private IEnumerable<Day> PopulateWeek(Week week)
+    public void SetResponseTime(int milliseconds) => _emulateServiceResponseTime = milliseconds;
+
+    public void PopulateWeek(Week week, IEnumerable<Day> days)
     {
+        _weeks[week] = days;
+    }
+
+    private IEnumerable<Day> GetWeekOrPopulate(Week week)
+    {
+        if (_weeks.ContainsKey(week))
+            return _weeks[week];
+
         var days = new List<Day>();
         for (int i = 0; i < 7; i++)
         {
@@ -69,7 +80,7 @@ internal class FamulusServiceMock : IFamulusService
             days.Add(day);
         }
 
-        return days;
+        return _weeks[week] = days;
     }
 
     private Appointment CreateAppointment(DateOnly date, int i)
