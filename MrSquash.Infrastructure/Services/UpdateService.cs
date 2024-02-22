@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using Squirrel;
-using Squirrel.Sources;
+using Velopack;
+using Velopack.Sources;
 
 namespace MrSquash.Infrastructure.Services;
 
 public class UpdateService : IUpdateService
 {
     private const string GITHUB_URL = "https://github.com/kodaniel/MrSquashWatcher";
-    private const string ACCESS_TOKEN = "";
+    private const string ACCESS_TOKEN = ""; // If empty, only limited number of requests are allowed
 
     private readonly ILogger<UpdateService> _logger;
 
@@ -18,23 +18,21 @@ public class UpdateService : IUpdateService
 
     public async Task UpdateApp()
     {
-        using var mgr = new UpdateManager(urlOrPath: null);
-        if (mgr.IsInstalledApp)
-        {
-            try
-            {
-                using var remoteMgr = new UpdateManager(new GithubSource(GITHUB_URL, ACCESS_TOKEN, false));
+        var githubSrc = new GithubSource(GITHUB_URL, ACCESS_TOKEN, false);
+        var mgr = new UpdateManager(githubSrc);
 
-                var newVersion = await remoteMgr.UpdateApp();
-                if (newVersion != null)
-                {
-                    UpdateManager.RestartApp();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error on updating the application.");
-            }
+        if (mgr.IsInstalled)
+        {
+            // check for new version
+            var newVersion = await mgr.CheckForUpdatesAsync();
+            if (newVersion == null)
+                return; // no update available
+
+            // download new version
+            await mgr.DownloadUpdatesAsync(newVersion);
+
+            // install new version and restart app
+            mgr.ApplyUpdatesAndRestart(newVersion);
         }
     }
 }

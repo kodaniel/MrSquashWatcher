@@ -49,7 +49,7 @@ public class SettingsViewModel : BindableBase, IDialogAware
         }
     }
 
-    public string ApplicationVersion => App.Version.ToString(); //Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+    public string ApplicationVersion => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
     public string Title => "Beállítások";
 

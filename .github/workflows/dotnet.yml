@@ -10,25 +10,17 @@ on:
     - '**.xaml'
 
 env:
-  Solution_Name: MrSquashWatcher.sln
-  Test_Project_Path: MrSquash.Tests\MrSquash.Tests.csproj
   DOTNET_VERSION: '8.0.x' # The .NET SDK version to use
 
 jobs:
   build:
-
-    name: build-${{matrix.os}}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
-
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # Install the .NET Core workload
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     

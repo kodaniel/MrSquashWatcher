@@ -1,28 +1,24 @@
-name: release
+name: Deploy release
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ master ]
+    tags:
+    - 'releases/v*'
 
 env:
-  Solution_Name: MrSquashWatcher.sln
+  PROJECT_ID: 'MrSquashWatcher'
   Test_Project_Path: MrSquash.Tests\MrSquash.Tests.csproj
   DOTNET_VERSION: '8.0.x' # The .NET SDK version to use
   
 jobs:
   build:
-
-    name: build-${{matrix.os}}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
-
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
@@ -30,26 +26,17 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build -c Release --no-restore
 
     - name: Test
-      run: dotnet test --no-build --configuration Release
+      run: dotnet test --no-build -c Release
 
     - name: Publish
-      run: dotnet publish --no-build --configuration Release --self-contained true -p:Version=${{ github.ref_name }}
+      run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true -p:Version=${{ github.ref }}
     
-    - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v2
-      with:
-        name: Installer
-        path: ./Releases
-    
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        fail_on_unmatched_files: true
-        generate_release_notes: true
-        files: |
-          ./Releases/RELEASES
-          ./Releases/MrSquashWatcher-${{ github.ref_name }}-full.nupkg
-          ./Releases/MrSquashWatcherSetup.exe
+    - name: Create Velopack Release
+      run: |
+        dotnet tool install -g vpk
+        vpk download github --repoUrl https://github.com/${{ github.repository }}
+        vpk pack -u ${{ PROJECT_ID }} -v ${{ github.ref }} -p publish
+        vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "${{ env.PROJECT_ID }} ${{ github.ref }}" --tag v${{ github.ref }}

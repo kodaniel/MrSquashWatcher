@@ -3,42 +3,38 @@ using MrSquashWatcher.Extensions;
 using MrSquashWatcher.Views;
 using Prism.Ioc;
 using Serilog;
-using Squirrel;
+using Velopack;
 using System.Windows;
 
 namespace MrSquashWatcher;
 
 public partial class App
 {
-    private static Mutex _mutex;
-
+    public const string AppId = "MrSquashWatcher";
+    
     public static TaskbarIcon TaskBarIcon { get; private set; }
-
-    public static SemanticVersion Version { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        const string appName = "MrSquashWatcher";
-        bool createdNew;
+        _ = new Mutex(true, AppId, out bool createdNew);
 
-        _mutex = new Mutex(true, appName, out createdNew);
-
-        if (!createdNew)
-        {
-            //app is already running! Exiting the application  
-            Current.Shutdown();
-        }
-
-        SquirrelAwareApp.HandleEvents(
-            onInitialInstall: OnAppInstall,
-            onAppUninstall: OnAppUninstall,
-            onEveryRun: OnAppRun);
+        AppDomain.CurrentDomain.UnhandledException += (s, e) => Log.Error(e.ExceptionObject as Exception, "UnhandledException");
 
         // Configure Serilog and the sinks at the startup of the app
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.File(path: "MrSquashWatcher.log")
             .CreateLogger();
+
+        if (!createdNew)
+        {
+            Log.Information("App is already running");
+
+            // App is already running! Exiting the application
+            Current.Shutdown();
+        }
+
+        VelopackApp.Build().Run();
 
         base.OnStartup(e);
 
@@ -100,22 +96,5 @@ public partial class App
 
         // Flush all Serilog sinks before the app closes
         Log.CloseAndFlush();
-    }
-
-    private static void OnAppInstall(SemanticVersion version, IAppTools tools)
-    {
-        tools.CreateShortcutForThisExe(ShortcutLocation.StartMenu);
-    }
-
-    private static void OnAppUninstall(SemanticVersion version, IAppTools tools)
-    {
-        tools.RemoveShortcutForThisExe(ShortcutLocation.StartMenu);
-    }
-
-    private static void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
-    {
-        Version = version ?? new SemanticVersion("0.0.0");
-
-        tools.SetProcessAppUserModelId();
     }
 }
