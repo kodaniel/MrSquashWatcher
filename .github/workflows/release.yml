@@ -38,5 +38,5 @@ jobs:
       run: |
         dotnet tool install -g vpk
         vpk download github --repoUrl https://github.com/${{ github.repository }}
-        vpk pack -u ${{ PROJECT_ID }} -v ${{ github.ref }} -p publish
+        vpk pack -u ${{ env.PROJECT_ID }} -v ${{ github.ref }} -p publish
         vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "${{ env.PROJECT_ID }} ${{ github.ref }}" --tag v${{ github.ref }}
