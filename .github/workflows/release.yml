@@ -8,6 +8,7 @@ on:
 
 env:
   PROJECT_ID: 'MrSquashWatcher'
+  Test_Project_Path: MrSquash.Tests\MrSquash.Tests.csproj
   DOTNET_VERSION: '8.0.x' # The .NET SDK version to use
   
 jobs:
@@ -31,11 +32,11 @@ jobs:
       run: dotnet test --no-build -c Release
 
     - name: Publish
-      run: dotnet publish --no-build -c Release --self-contained true -p:Version=${{ github.ref }} -p:TargetFramework=net8.0-windows10.0.17763.0
+      run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true -p:Version=${{ github.ref }}
     
-    # - name: Create Velopack Release
-      # run: |
-        # dotnet tool install -g vpk
-        # vpk download github --repoUrl https://github.com/${{ github.repository }}
-        # vpk pack -u ${{ env.PROJECT_ID }} -v ${{ github.ref }} -p publish
-        # vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "${{ env.PROJECT_ID }} ${{ github.ref }}" --tag v${{ github.ref }}
+    - name: Create Velopack Release
+      run: |
+        dotnet tool install -g vpk
+        vpk download github --repoUrl https://github.com/${{ github.repository }}
+        vpk pack -u ${{ env.PROJECT_ID }} -v ${{ github.ref }} -p publish
+        vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "${{ env.PROJECT_ID }} ${{ github.ref }}" --tag v${{ github.ref }}
