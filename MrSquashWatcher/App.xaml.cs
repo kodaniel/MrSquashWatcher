@@ -18,7 +18,7 @@ public partial class App
     {
         _ = new Mutex(true, AppId, out bool createdNew);
 
-        AppDomain.CurrentDomain.UnhandledException += (s, e) => Log.Error(e.ExceptionObject as Exception, "UnhandledException");
+        AppDomain.CurrentDomain.UnhandledException += (s, e) => Log.Fatal(e.ExceptionObject as Exception, "UnhandledException");
 
         // Configure Serilog and the sinks at the startup of the app
         Log.Logger = new LoggerConfiguration()

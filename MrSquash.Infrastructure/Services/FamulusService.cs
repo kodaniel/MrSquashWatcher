@@ -2,6 +2,7 @@
 using MrSquash.Infrastructure.Dtos;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Polly;
 
 namespace MrSquash.Infrastructure.Services;
 
@@ -19,10 +20,12 @@ public class FamulusService : IFamulusService
         _client = new();
         _client.BaseAddress = new Uri("https://famulushotel.hu/");
         _client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+        _client.Timeout = TimeSpan.FromSeconds(10);
     }
 
     public async Task<bool> Reserve(Reservation reservation, CancellationToken cancellationToken = default!)
     {
+        var attempt = 0;
         var url = "ajax?do=modules/track_reservation/save";
         var values = new Dictionary<string, string>()
         {
@@ -37,10 +40,24 @@ public class FamulusService : IFamulusService
             { "end_time", reservation.EndTime.ToString("HH:mm") },
         };
 
+        var pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(3),
+                OnRetry = args =>
+                {
+                    _logger.LogWarning("Retry to reserve. Attempts: {attempt}", ++attempt);
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
+
         try
         {
             var content = new FormUrlEncodedContent(values);
-            var response = await _client.PostAsync(url, content);
+            var response = await pipeline.ExecuteAsync(static async (state, token) => await state.client.PostAsync(state.url, state.content, token),
+                (content, url, client: _client), cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException("Status code is not 200.");
@@ -61,16 +78,31 @@ public class FamulusService : IFamulusService
 
     public async Task<IEnumerable<Day>> FetchCurrentWeek(CancellationToken cancellationToken = default!)
     {
+        var attempt = 0;
         var url = "ajax?do=modules/track_reservation/change_type";
         var values = new Dictionary<string, string>()
         {
             { "type_id", $"{SQUASH_TYPE_ID}" }
         };
 
+        var pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(3),
+                OnRetry = args =>
+                {
+                    _logger.LogWarning("Retry to fetch the current week. Attempts: {attempt}", ++attempt);
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
+
         try
         {
             var content = new FormUrlEncodedContent(values);
-            var response = await _client.PostAsync(url, content, cancellationToken);
+            var response = await pipeline.ExecuteAsync(static async (state, token) => await state.client.PostAsync(state.url, state.content, token),
+                (content, url, client: _client), cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException("Status code is not 200.");
@@ -84,12 +116,13 @@ public class FamulusService : IFamulusService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to fetch the current week.");
-            return new List<Day>();
+            return Enumerable.Empty<Day>();
         }
     }
 
     public async Task<IEnumerable<Day>> FetchNextWeek(Week week, CancellationToken cancellationToken = default!)
     {
+        var attempt = 0;
         var url = "ajax?do=modules/track_reservation/next_week";
         var values = new Dictionary<string, string>()
         {
@@ -97,10 +130,24 @@ public class FamulusService : IFamulusService
             { "date", week.StartDate.ToString("yyyy-MM-dd") }
         };
 
+        var pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(3),
+                OnRetry = args =>
+                {
+                    _logger.LogWarning("Retry to fetch the next week. Attempts: {attempt}", ++attempt);
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
+
         try
         {
             var content = new FormUrlEncodedContent(values);
-            var response = await _client.PostAsync(url, content, cancellationToken);
+            var response = await pipeline.ExecuteAsync(static async (state, token) => await state.client.PostAsync(state.url, state.content, token),
+                (content, url, client: _client), cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException("Status code is not 200.");
@@ -114,7 +161,7 @@ public class FamulusService : IFamulusService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to fetch the next week.");
-            return new List<Day>();
+            return Enumerable.Empty<Day>();
         }
     }
 
