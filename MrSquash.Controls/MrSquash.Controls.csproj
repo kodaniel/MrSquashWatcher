@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
 </Project>

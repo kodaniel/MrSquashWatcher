@@ -32,11 +32,11 @@ jobs:
       run: dotnet test --no-build -c Release
 
     - name: Publish
-      run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true -p:Version=${{ github.ref }}
+      run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true -p:Version="2.0.0"
     
     - name: Create Velopack Release
       run: |
         dotnet tool install -g vpk
         vpk download github --repoUrl https://github.com/${{ github.repository }}
-        vpk pack -u ${{ env.PROJECT_ID }} -v ${{ github.ref }} -p publish
+        vpk pack -u ${{ env.PROJECT_ID }} --mainExe ${{ env.PROJECT_ID }}.exe -v 2.0.0 -p publish --framework net8,vcredist143-x64 --skipVeloAppCheck --channel win
         vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "${{ env.PROJECT_ID }} ${{ github.ref }}" --tag v${{ github.ref }}
