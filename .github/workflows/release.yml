@@ -23,13 +23,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore -r win-x64
 
     - name: Build
-      run: dotnet build -c Release --no-restore
+      run: dotnet build -c Release --no-restore -r win-x64
 
     - name: Test
-      run: dotnet test --no-build -c Release
+      run: dotnet test --no-build -c Release -r win-x64
 
     - name: Publish
       run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true -p:Version="2.0.0"
