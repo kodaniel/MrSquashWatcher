@@ -1,0 +1,66 @@
+name: CI pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  DotNet_Version: '8.0.x' # The .NET SDK version to use
+  Wpf_Project_Path: MrSquashWatcher\MrSquashWatcher.csproj
+
+jobs:
+
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    # Checkout
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+
+    # Use Nerdbank.GitVersioning to set version variables: https://github.com/AArnott/nbgv
+    - name: Use Nerdbank.GitVersioning to set version variables
+      uses: dotnet/nbgv@master
+      id: nbgv
+      
+    # Install the .NET Core workload
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DotNet_Version }}
+    
+    # Update the version before build
+    - name: Update manifest version
+      run: |
+        [xml]$project = get-content ".\$env:Wpf_Project_Path"
+        $project.Project.PropertyGroup.Version = "${{ steps.nbgv.outputs.SimpleVersion }}-I${{ github.run_number }}"
+        $project.save(".\$env:Wpf_Project_Path")
+    
+    # Install dependencies
+    - name: Install dependencies
+      run: dotnet restore
+
+    # Build
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    # Execute all unit tests in the solution
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal
+    
+    # Publish app
+    - name: Publish
+      run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true
+  
+    # Upload the MSIX package: https://github.com/marketplace/actions/upload-artifact
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Published package
+        path: ./publish
