@@ -56,7 +56,7 @@ jobs:
     
     # Publish app
     - name: Publish
-      run: dotnet publish --no-build -c Release -o publish -r win-x64 --self-contained true
+      run: dotnet publish --no-build -c Release -o publish --self-contained true
   
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
